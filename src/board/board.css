@@ -1,0 +1,8 @@
+.board {
+    width: 90vw;
+    height: 90vh;
+    margin: 0 auto;
+    background-image: url('/board-assets/chessboard.png');
+    background-repeat: no-repeat;
+    border-radius: 2px;
+}

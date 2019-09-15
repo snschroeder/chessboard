@@ -1,0 +1,20 @@
+.pawn {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    width: 125px;
+    height:125px;
+    background-image: url('/piece-assets/Chess_plt45.png');
+    background-size: 100%;
+}
+/* 
+[id='0103'] {
+    bottom: 125px;
+    left: 125px;
+}
+
+[id='0102'] {
+    bottom: 125px;
+    left: 250px;
+} */

@@ -1,6 +1,7 @@
 .board {
-    width: 90vw;
-    height: 90vh;
+    position: relative;
+    width: 1000px;
+    height: 1000px;
     margin: 0 auto;
     background-image: url('/board-assets/chessboard.png');
     background-repeat: no-repeat;

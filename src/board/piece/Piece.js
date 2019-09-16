@@ -1,8 +1,6 @@
 import React from 'react';
 import './piece.css'
 
-
-
 export default class Piece extends React.Component {
   state = {
     pos: this.props.pos,
@@ -26,14 +24,10 @@ export default class Piece extends React.Component {
       return;
     }
     let elem = document.elementFromPoint(e.pageX, e.pageY)
-    let top = elem.getBoundingClientRect().top;
-    let left = elem.getBoundingClientRect().left;
-    let x = elem.getBoundingClientRect().x;
-    let y = elem.getBoundingClientRect().y;
 
     let updatedRel = {
-      x: e.pageX - left,
-      y: e.pageY - top
+      x: e.pageX - elem.offsetLeft,
+      y: e.pageY - elem.offsetTop
     }
     this.setState({
       dragging: true,
@@ -45,16 +39,15 @@ export default class Piece extends React.Component {
 
   onMouseUp = e => {
     this.props.updatePos(this.state.dragPos.x, this.state.dragPos.y)
-    this.setState({ 
+    this.setState({
       dragging: false,
-      dragPos: {x: 0, y: 0} 
+      dragPos: {x: 0, y: 0}
     });
 
     e.stopPropagation();
     e.preventDefault();
   }
 
-  //TODO if this all works, move the position updating to the parent
   onMouseMove = e => {
     if (!this.state.dragging) {
       return
@@ -71,18 +64,17 @@ export default class Piece extends React.Component {
     e.preventDefault();
   }
 
-
-
   render() {
     const dragStyle = {
       left: this.state.dragPos.x + 'px',
-      top: this.state.dragPos.y + 'px'
+      top: this.state.dragPos.y + 'px',
+      zIndex: 9999,
     }
+
     const staticStyle = {
       left: this.props.pos.x + 'px',
       top: this.props.pos.y + 'px'
     }
-    console.log(this.props.pos)
     return (
       <div className={this.props.pieceType} id={this.props.pieceId} style={this.state.dragging ? dragStyle : staticStyle} onMouseDown={this.onMouseDown}>
       </div>

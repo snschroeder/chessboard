@@ -2,8 +2,12 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 125px;
-    height: 125px;
+    width: 10vw;
+    height: 10vw;
+    min-height: 38px;
+    min-width: 38px;
+    max-height: 125px;
+    max-width: 125px;
     margin: 0;
 }
 

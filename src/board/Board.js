@@ -1,8 +1,8 @@
 import React from 'react';
 import './board.css'
-import Piece from './piece/Piece'
+
 //import Square from './square/Square'
-import Gamestate from '../chess-app/src/gamestate'
+
 import Piecelist from './pieceslist/Piecelist'
 
 
@@ -12,15 +12,17 @@ export default class Board extends React.Component {
     boardHeight: null,
     boardWidth: null,
     squareSize: null,
-    board: this.props.board,
-    pieces: [], 
+    gameState: this.props.gameState,
+    board: this.props.gameState.board.playArea,
+    pieces: [],
+    currentTurn: this.props.currentTurn
   }
 
   componentDidMount() {
     this.updateDimensions();
     window.addEventListener('resize', this.updateDimensions);
     setTimeout(() => {
-      this.setState({renderPieces: true})
+      this.setState({ renderPieces: true })
     }, 1500)
   }
 
@@ -38,28 +40,69 @@ export default class Board extends React.Component {
     })
   }
 
+  updatePieceList = (pieceList) => {
+    this.setState({ pieces: pieceList })
+  }
 
-  // onChange = (x, y) => {
-  //   if (x > 300 && y > 300) {
-  //     let snapX = Math.round((x / this.state.squareSize)) * this.state.squareSize;
-  //     let snapY = Math.round((y / this.state.squareSize)) * this.state.squareSize;
 
-  //     this.setState({
-  //       pos: { x: snapX, y: snapY }
-  //     })
-  //   } else {
-  //     this.setState({
-  //       pos: this.state.pos
-  //     })
-  //   }
-  // }
+
+
+  onChange = (x, y, pieceId, piecePos) => {
+    let piecePosArr = [piecePos.y, piecePos.x]
+    let piece;
+    let snapX = Math.round((x / this.state.squareSize));
+    let snapY = Math.round((y / this.state.squareSize));
+
+    let arrayX = 7 - snapX;
+    let arrayY = 7- snapY;
+
+    this.state.board.forEach(row => row.forEach(col => {
+      if (col.position[0] === piecePos.x && col.position[1] === piecePos.y) {
+        piece = col.getPiece()
+      }
+    }))
+
+
+    let move = this.state.gameState.move(piecePosArr, [arrayY, arrayX])
+    console.log(move)
+
+    if (move) {
+      console.log('inside movement')
+      let updatedPieces = [];
+
+      updatedPieces = this.state.pieces.filter(piece => {
+
+        return !(piece.pos.x === snapX && piece.pos.y === snapY)
+      })
+
+      updatedPieces = updatedPieces.map(piece => {
+        if (piece.id === pieceId) {
+          piece.pos = { x: snapX, y: snapY };
+          return piece;
+        } else {
+          return piece
+        }
+      })
+
+
+
+      this.setState({
+        pieces: updatedPieces
+      })
+    }
+  }
 
 
   render() {
     return (
       <div className="board" id="board">
 
-        <Piecelist board={this.state.board} squareSize={this.state.squareSize}   />
+        <Piecelist
+          board={this.state.board}
+          squareSize={this.state.squareSize}
+          pieces={this.state.pieces}
+          updatePos={this.onChange}
+          updatePieces={this.updatePieceList} />
       </div>
     );
   }

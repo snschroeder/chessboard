@@ -14,6 +14,7 @@
             wait for new move
     
     this week goals:
+        get resize working correctly
         display piece graveyard
         display point differential
 
@@ -60,39 +61,39 @@ export default class Piecelist extends React.Component {
         }, 50)
     }
 
-    onChange = (x, y, pieceId) => {
+    // onChange = (x, y, pieceId) => {
 
-        if (true) {
-            let updatedPieces = [];
+    //     if (true) {
+    //         let updatedPieces = [];
             
 
-            let snapX = Math.round((x / this.props.squareSize));
-            let snapY = Math.round((y / this.props.squareSize));
+    //         let snapX = Math.round((x / this.props.squareSize));
+    //         let snapY = Math.round((y / this.props.squareSize));
 
-            updatedPieces = this.state.pieces.filter(piece => {
+    //         updatedPieces = this.state.pieces.filter(piece => {
 
-                return !(piece.pos.x === snapX && piece.pos.y === snapY)
-            })
+    //             return !(piece.pos.x === snapX && piece.pos.y === snapY)
+    //         })
 
-            console.log(snapX)
-            console.log(snapY)
+    //         console.log(snapX)
+    //         console.log(snapY)
 
-            updatedPieces = updatedPieces.map(piece => {
-                if (piece.id === pieceId) {
-                    piece.pos = { x: snapX, y: snapY };
-                    return piece;
-                } else {
-                    return piece
-                }
-            })
+    //         updatedPieces = updatedPieces.map(piece => {
+    //             if (piece.id === pieceId) {
+    //                 piece.pos = { x: snapX, y: snapY };
+    //                 return piece;
+    //             } else {
+    //                 return piece
+    //             }
+    //         })
 
 
 
-            this.setState({
-                pieces: updatedPieces
-            })
-        }
-    }
+    //         this.setState({
+    //             pieces: updatedPieces
+    //         })
+    //     }
+    // }
 
     generatePieceData = () => {
         let pieceData = this.props.board.map((row, rInd) => row.map((col, cInd) => {
@@ -100,36 +101,34 @@ export default class Piecelist extends React.Component {
                 let pieceClass = `${col.getPiece().getColor()}-${col.getPiece().getName()}`;
                 let pieceId = `${col.getPiece().getColor()}-${col.letter}-${col.getPiece().getName()}`;
                 let position = { x: 7 - cInd, y: 7 - rInd }
-                return { notation: col.notation, pieceType: pieceClass, id: pieceId, pos: position }
+                let arrayPos = {x: cInd, y: rInd}
+                return { color: col.getPiece().getColor(), notation: col.notation, pieceType: pieceClass, id: pieceId, pos: position, arrPos: arrayPos}
             } else {
                 return null;
             }
         }))
         pieceData = pieceData.map(row => row.filter(item => item)).flat();
-        this.setState({
-            pieces: pieceData
-        })
+
+        this.props.updatePieces(pieceData)
     }
 
     displayPiecesPos = () => {
-        let piecesJSX = this.state.pieces.map(piece => {
+        let piecesJSX = this.props.pieces.map(piece => {
             return <Piece
+                color={piece.color}
                 square={piece.notation}
                 pieceType={piece.pieceType}
                 id={piece.id}
                 pos={piece.pos}
+                arrPos={piece.arrPos}
                 key={piece.id}
                 squareSize={this.props.squareSize}
-                updatePos={this.onChange} />
+                updatePos={this.props.updatePos} />
         })
         return piecesJSX;
     }
 
     render() {
-        if (this.props.resized) {
-            this.generatePieceData();
-            this.props.updateResized()
-        }
         return (
             <>
                 {this.displayPiecesPos()}

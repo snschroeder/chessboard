@@ -39,43 +39,27 @@ export default class Board extends React.Component {
   }
 
 
-  // displayStartPos = () => {
-  //   let piecesJSX = this.state.board.map((row, rInd) => row.map((col, cInd) => {
-  //     if (col.piece) {
+  // onChange = (x, y) => {
+  //   if (x > 300 && y > 300) {
+  //     let snapX = Math.round((x / this.state.squareSize)) * this.state.squareSize;
+  //     let snapY = Math.round((y / this.state.squareSize)) * this.state.squareSize;
 
-  //       let pieceClass = `${col.getPiece().getColor()}-${col.getPiece().getName()}`;
-  //       let id = `${col.letter}-${col.getPiece().getName()}`;
-  //       let pos = { x: (7 - cInd) * this.state.squareSize, y: (7 - rInd) * this.state.squareSize }
-
-  //       return <Piece square={col.notation} pieceType={pieceClass} id={id} pos={pos} />
-  //     } else {
-  //       return null;
-  //     }
-  //   }))
-  //   return piecesJSX;
+  //     this.setState({
+  //       pos: { x: snapX, y: snapY }
+  //     })
+  //   } else {
+  //     this.setState({
+  //       pos: this.state.pos
+  //     })
+  //   }
   // }
-
-  onChange = (x, y) => {
-    if (x > 300 && y > 300) {
-      let snapX = Math.round((x / this.state.squareSize)) * this.state.squareSize;
-      let snapY = Math.round((y / this.state.squareSize)) * this.state.squareSize;
-
-      this.setState({
-        pos: { x: snapX, y: snapY }
-      })
-    } else {
-      this.setState({
-        pos: this.state.pos
-      })
-    }
-  }
 
 
   render() {
     return (
       <div className="board" id="board">
 
-        <Piecelist board={this.state.board} squareSize={this.state.squareSize} />
+        <Piecelist board={this.state.board} squareSize={this.state.squareSize}   />
       </div>
     );
   }

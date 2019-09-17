@@ -3,8 +3,8 @@ import './piece.css'
 
 export default class Piece extends React.Component {
   state = {
-    pos: this.props.pos,
-    dragPos: {x: 0, y: 0},
+    pos: this.props.pos, //might not be ideal, look into fixing later
+    dragPos: { x: 0, y: 0 },
     dragging: false,
     rel: null,
   }
@@ -23,6 +23,7 @@ export default class Piece extends React.Component {
     if (e.button !== 0) {
       return;
     }
+    console.log('in mouse down')
     let elem = document.elementFromPoint(e.pageX, e.pageY)
 
     let updatedRel = {
@@ -38,10 +39,10 @@ export default class Piece extends React.Component {
   }
 
   onMouseUp = e => {
-    this.props.updatePos(this.state.dragPos.x, this.state.dragPos.y)
+    this.props.updatePos(this.state.dragPos.x, this.state.dragPos.y, this.props.id)
     this.setState({
       dragging: false,
-      dragPos: {x: 0, y: 0}
+      dragPos: { x: 0, y: 0 }
     });
 
     e.stopPropagation();
@@ -72,12 +73,15 @@ export default class Piece extends React.Component {
     }
 
     const staticStyle = {
-      left: this.props.pos.x + 'px',
-      top: this.props.pos.y + 'px'
+      left: (this.props.pos.x * this.props.squareSize) + 'px',
+      top: (this.props.pos.y * this.props.squareSize) + 'px'
     }
     return (
-      <div className={this.props.pieceType} id={this.props.pieceId} style={this.state.dragging ? dragStyle : staticStyle} onMouseDown={this.onMouseDown}>
-      </div>
+      <div className={this.props.pieceType}
+        id={this.props.id}
+        style={this.state.dragging ? dragStyle : staticStyle}
+        onMouseDown={(e)=> this.onMouseDown(e)}>
+      </div >
     );
   }
 }

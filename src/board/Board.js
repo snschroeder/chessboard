@@ -4,6 +4,7 @@ import './board.css'
 //import Square from './square/Square'
 
 import Piecelist from './pieceslist/Piecelist'
+import GameState from '../chess-engine/gamestate';
 
 
 
@@ -12,14 +13,15 @@ export default class Board extends React.Component {
     boardHeight: null,
     boardWidth: null,
     squareSize: null,
-    gameState: this.props.gameState,
-    board: this.props.gameState.board.playArea,
+    gameState: new GameState(),
+    //board: this.props.gameState.board.playArea,
     pieces: [],
     currentTurn: this.props.currentTurn
   }
 
   componentDidMount() {
     this.updateDimensions();
+    this.state.gameState.initNewGame();
     window.addEventListener('resize', this.updateDimensions);
     setTimeout(() => {
       this.setState({ renderPieces: true })
@@ -47,58 +49,71 @@ export default class Board extends React.Component {
 
 
 
+
+
+
   onChange = (x, y, pieceId, piecePos) => {
     let piecePosArr = [piecePos.y, piecePos.x]
+
+    console.log(piecePosArr)
     let piece;
     let snapX = Math.round((x / this.state.squareSize));
     let snapY = Math.round((y / this.state.squareSize));
 
-    let arrayX = 7 - snapX;
-    let arrayY = 7- snapY;
-
-    this.state.board.forEach(row => row.forEach(col => {
+    this.state.gameState.board.playArea.forEach(row => row.forEach(col => {
       if (col.position[0] === piecePos.x && col.position[1] === piecePos.y) {
         piece = col.getPiece()
       }
     }))
 
+    let move = this.state.gameState.move(piecePosArr, [snapY, snapX])
 
-    let move = this.state.gameState.move(piecePosArr, [arrayY, arrayX])
-    console.log(move)
 
     if (move) {
-      console.log('inside movement')
+
+      //Look here - this is probably where the bug is. Gamestate is updating, piece positions are wonky ---- is gamestate updating correctly?
       let updatedPieces = [];
-
       updatedPieces = this.state.pieces.filter(piece => {
-
         return !(piece.pos.x === snapX && piece.pos.y === snapY)
       })
 
       updatedPieces = updatedPieces.map(piece => {
         if (piece.id === pieceId) {
           piece.pos = { x: snapX, y: snapY };
+
           return piece;
         } else {
           return piece
         }
       })
 
-
-
       this.setState({
-        pieces: updatedPieces
+        pieces: updatedPieces,
+
       })
     }
   }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   render() {
     return (
-      <div className="board" id="board">
+      <div className="board" id="board" >
 
         <Piecelist
-          board={this.state.board}
+          gameState={this.state.gameState}
+          //board={this.state.board}
           squareSize={this.state.squareSize}
           pieces={this.state.pieces}
           updatePos={this.onChange}

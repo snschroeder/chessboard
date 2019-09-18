@@ -25,8 +25,8 @@ export default class GameState {
         pieces.push(new Knight('white', [0, 6], this.board));
         pieces.push(new Bishop('white', [0, 2], this.board));
         pieces.push(new Bishop('white', [0, 5], this.board));
-        pieces.push(new Queen('white', [0, 3], this.board));
-        pieces.push(new King('white', [0, 4], this.board));
+        pieces.push(new Queen('white', [0, 4], this.board));
+        pieces.push(new King('white', [0, 3], this.board));
         for (let i = 0; i < this.board.getDims(); i++) {
             pieces.push(new Pawn('white', [1, i], this.board));
         }
@@ -36,8 +36,8 @@ export default class GameState {
         pieces.push(new Knight('black', [7, 6], this.board));
         pieces.push(new Bishop('black', [7, 2], this.board));
         pieces.push(new Bishop('black', [7, 5], this.board));
-        pieces.push(new Queen('black', [7, 3], this.board));
-        pieces.push(new King('black', [7, 4], this.board));
+        pieces.push(new Queen('black', [7, 4], this.board));
+        pieces.push(new King('black', [7, 3], this.board));
         for (let i = 0; i < this.board.getDims(); i++) {
             pieces.push(new Pawn('black', [6, i], this.board));
         }
@@ -252,12 +252,23 @@ export default class GameState {
     }
 
     move(piecePos, move) {
+
         let legalMoves = this.generateAllLegalMoves(this.currentState[0].player);
+
+        console.log(legalMoves);
+
         let pieceObj = legalMoves.find(piece => this.posComparator(piecePos, piece.position));
 
-        if (pieceObj.color !== this.currentState[0].player) {
+        console.log(pieceObj)
+
+        if (pieceObj === undefined || pieceObj.moves.length === 0) {
+            console.log('in the bad if')
             return false;
         }
+
+        // if (pieceObj.color !== this.currentState[0].player) {
+        //     return false;
+        // }
 
         if (pieceObj.name === 'king' && Math.abs(piecePos[1] - move[1]) === 2) {
             this.handleCastle(pieceObj, move)
@@ -269,10 +280,12 @@ export default class GameState {
 
             if (validMove !== undefined) {
                 if (this.board.getSquare(move[0], move[1]).getPiece() !== null) {
+                    console.log('inside cap if')
 
                     this.currentState[1].pieceTotal -= this.board.getSquare(move[0], move[1]).getPiece().value;
                     this.board.getSquare(move[0], move[1]).removePiece(); //try removing later
                     this.board.getSquare(move[0], move[1]).setPiece(pieceObj);
+                    this.board.getSquare(move[0], move[1]).getPiece().setPosition([move[0], move[1]])
                     this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
                     this.currentState.reverse();
 
@@ -281,10 +294,12 @@ export default class GameState {
                         || pieceObj.name === 'pawn') {
                         pieceObj.hasMoved();
                     }
+                    
                     return true;
                 } else {
                     this.board.getSquare(move[0], move[1]).setPiece(pieceObj);
                     this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
+                    this.board.getSquare(move[0], move[1]).getPiece().setPosition([move[0], move[1]])
                     this.currentState.reverse();
 
                     if (pieceObj.name === 'king'
@@ -337,6 +352,7 @@ export default class GameState {
     //}
 
     turn(piece, move) {
+        console.log(this.currentState[0])
         let currPlayer = this.currentState[0].player;
         let opponent = this.currentState[1].player;
 
@@ -369,10 +385,23 @@ export default class GameState {
         this.board.assignNotation();
         this.board.assignColor();
         this.generateStartPosition();
+        //this.rotateBoard();
     }
 
     getCurrentTurn() {
         return this.currentState[0].player
+    }
+    
+    getGameStatePlayArea() {
+        return this.board.playArea;
+    }
+    getGameStateBoard() {
+        return this.board;
+    }
+
+    rotateBoard() {
+        this.board.playArea.forEach(row => row.reverse());
+        this.board.playArea.reverse();
     }
 
     posComparator(firstPos, secondPos) { return (firstPos[0] === secondPos[0] && firstPos[1] === secondPos[1]); }
@@ -380,11 +409,11 @@ export default class GameState {
 
 
 
-// let gameState = new GameState();
-// gameState.board.createBoard();
-// gameState.board.assignNotation();
-// gameState.board.assignColor();
-// gameState.generateStartPosition();
+let gameState = new GameState();
+gameState.initNewGame();
+
+console.log(gameState.board.playArea)
+
 
 
 

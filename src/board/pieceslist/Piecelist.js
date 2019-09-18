@@ -96,13 +96,13 @@ export default class Piecelist extends React.Component {
     // }
 
     generatePieceData = () => {
-        let pieceData = this.props.board.map((row, rInd) => row.map((col, cInd) => {
+        let pieceData = this.props.gameState.board.playArea.map((row, rInd) => row.map((col, cInd) => {
             if (col.piece) {
                 let pieceClass = `${col.getPiece().getColor()}-${col.getPiece().getName()}`;
                 let pieceId = `${col.getPiece().getColor()}-${col.letter}-${col.getPiece().getName()}`;
-                let position = { x: 7 - cInd, y: 7 - rInd }
-                let arrayPos = {x: cInd, y: rInd}
-                return { color: col.getPiece().getColor(), notation: col.notation, pieceType: pieceClass, id: pieceId, pos: position, arrPos: arrayPos}
+                let position = { x: cInd, y: rInd }
+                // let arrayPos = {x: cInd, y: rInd}
+                return { color: col.getPiece().getColor(), notation: col.notation, pieceType: pieceClass, id: pieceId, pos: position}
             } else {
                 return null;
             }
@@ -120,7 +120,7 @@ export default class Piecelist extends React.Component {
                 pieceType={piece.pieceType}
                 id={piece.id}
                 pos={piece.pos}
-                arrPos={piece.arrPos}
+                // arrPos={piece.arrPos}
                 key={piece.id}
                 squareSize={this.props.squareSize}
                 updatePos={this.props.updatePos} />

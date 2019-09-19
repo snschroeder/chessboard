@@ -55,7 +55,6 @@ export default class Board extends React.Component {
   onChange = (x, y, pieceId, piecePos) => {
     let piecePosArr = [piecePos.y, piecePos.x]
 
-    console.log(piecePosArr)
     let piece;
     let snapX = Math.round((x / this.state.squareSize));
     let snapY = Math.round((y / this.state.squareSize));
@@ -71,7 +70,6 @@ export default class Board extends React.Component {
 
     if (move) {
 
-      //Look here - this is probably where the bug is. Gamestate is updating, piece positions are wonky ---- is gamestate updating correctly?
       let updatedPieces = [];
       updatedPieces = this.state.pieces.filter(piece => {
         return !(piece.pos.x === snapX && piece.pos.y === snapY)

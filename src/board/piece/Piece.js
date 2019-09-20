@@ -3,7 +3,7 @@ import './piece.css'
 
 export default class Piece extends React.Component {
   state = {
-    pos: this.props.pos, //might not be ideal, look into fixing later
+    //pos: this.props.pos, //might not be ideal, look into fixing later
     dragPos: { x: 0, y: 0 },
     dragging: false,
     rel: null,

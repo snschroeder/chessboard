@@ -24,7 +24,7 @@ export default class Piece {
         this.moves = generatedMoves.flat();
         return generatedMoves.flat();
     }
-    setPosition(newPos) {this.position.splice(0, this.position.length, ...newPos);}
+    setPosition(newPos) {this.position = [...newPos];}
     _generate_move_sequences() {return [];}
     getColor() {return this.color;}
     getPosition() {return this.position;}

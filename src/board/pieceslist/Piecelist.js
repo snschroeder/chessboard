@@ -61,47 +61,12 @@ export default class Piecelist extends React.Component {
         }, 50)
     }
 
-    // onChange = (x, y, pieceId) => {
-
-    //     if (true) {
-    //         let updatedPieces = [];
-            
-
-    //         let snapX = Math.round((x / this.props.squareSize));
-    //         let snapY = Math.round((y / this.props.squareSize));
-
-    //         updatedPieces = this.state.pieces.filter(piece => {
-
-    //             return !(piece.pos.x === snapX && piece.pos.y === snapY)
-    //         })
-
-    //         console.log(snapX)
-    //         console.log(snapY)
-
-    //         updatedPieces = updatedPieces.map(piece => {
-    //             if (piece.id === pieceId) {
-    //                 piece.pos = { x: snapX, y: snapY };
-    //                 return piece;
-    //             } else {
-    //                 return piece
-    //             }
-    //         })
-
-
-
-    //         this.setState({
-    //             pieces: updatedPieces
-    //         })
-    //     }
-    // }
-
     generatePieceData = () => {
         let pieceData = this.props.gameState.board.playArea.map((row, rInd) => row.map((col, cInd) => {
             if (col.piece) {
                 let pieceClass = `${col.getPiece().getColor()}-${col.getPiece().getName()}`;
                 let pieceId = `${col.getPiece().getColor()}-${col.letter}-${col.getPiece().getName()}`;
                 let position = { x: cInd, y: rInd }
-                // let arrayPos = {x: cInd, y: rInd}
                 return { color: col.getPiece().getColor(), notation: col.notation, pieceType: pieceClass, id: pieceId, pos: position}
             } else {
                 return null;
@@ -120,7 +85,6 @@ export default class Piecelist extends React.Component {
                 pieceType={piece.pieceType}
                 id={piece.id}
                 pos={piece.pos}
-                // arrPos={piece.arrPos}
                 key={piece.id}
                 squareSize={this.props.squareSize}
                 updatePos={this.props.updatePos} />

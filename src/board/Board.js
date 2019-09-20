@@ -14,7 +14,6 @@ export default class Board extends React.Component {
     boardWidth: null,
     squareSize: null,
     gameState: new GameState(),
-    //board: this.props.gameState.board.playArea,
     pieces: [],
     currentTurn: this.props.currentTurn
   }
@@ -54,10 +53,9 @@ export default class Board extends React.Component {
 
   onChange = (x, y, pieceId, piecePos) => {
     let piecePosArr = [piecePos.y, piecePos.x]
-
-    let piece;
     let snapX = Math.round((x / this.state.squareSize));
     let snapY = Math.round((y / this.state.squareSize));
+    let piece;
 
     this.state.gameState.board.playArea.forEach(row => row.forEach(col => {
       if (col.position[0] === piecePos.x && col.position[1] === piecePos.y) {
@@ -65,10 +63,10 @@ export default class Board extends React.Component {
       }
     }))
 
-    let move = this.state.gameState.move(piecePosArr, [snapY, snapX])
-
+    let move = this.state.gameState.isValidMove(piecePosArr, [snapY, snapX])
 
     if (move) {
+      this.state.gameState.turn(piece, [snapY, snapX])
 
       let updatedPieces = [];
       updatedPieces = this.state.pieces.filter(piece => {
@@ -111,7 +109,6 @@ export default class Board extends React.Component {
 
         <Piecelist
           gameState={this.state.gameState}
-          //board={this.state.board}
           squareSize={this.state.squareSize}
           pieces={this.state.pieces}
           updatePos={this.onChange}
@@ -120,8 +117,3 @@ export default class Board extends React.Component {
     );
   }
 }
-
-
-// <Piece square='0101' pieceType='pawn' id='a-pawn' updatePos={this.onChange} pos={this.state.pos} />
-// <Piece square='0101' pieceType='pawn' id='b-pawn' updatePos={this.onChange} pos={{x: this.statesquareSize, y: this.state.squareSize}} /> {/* <Square square='0101' />
-//<Square square='0102' /> 

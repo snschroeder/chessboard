@@ -1,5 +1,42 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+TODO
+    Bugs to address:
+        react state not updating when checkmate is reached
+        resize issue when sizing down, need to expand it a bit to get the pieces on the board
+        handle castle crashes the engine right now if the rooks have moved
+
+    
+    short term goals:
+        get resize working correctly
+        display piece graveyard
+        display point differential
+
+        spin board and allow 2P 1 comp play
+
+        integrate smoke and snapshot tests
+
+        fix display glitch where piece appears in top left immediate on pick up - can we set drag pos to pos?
+
+    Long term goals:
+
+        add option to hightlight valid moves
+
+        integrate stockfish? or other chess engine
+
+        integrate customizable turn timer
+
+        create websocket to allow online play
+
+        create chat
+
+        create username/avatar info and display
+
+        Chess opening explorer?
+
+        chess puzzles?
+
+
 ## Available Scripts
 
 In the project directory, you can run:

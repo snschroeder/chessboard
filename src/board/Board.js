@@ -18,13 +18,15 @@ export default class Board extends React.Component {
     currentTurn: this.props.currentTurn
   }
 
+  board = React.createRef();
+
   componentDidMount() {
     this.updateDimensions();
     this.state.gameState.initNewGame();
     window.addEventListener('resize', this.updateDimensions);
-    setTimeout(() => {
-      this.setState({ renderPieces: true })
-    }, 1500)
+    // setTimeout(() => {
+    //   this.setState({ renderPieces: true })
+    // }, 50)
   }
 
   componentWillUnmount() {
@@ -32,11 +34,13 @@ export default class Board extends React.Component {
   }
 
   updateDimensions = () => {
-    let board = document.getElementById('board');
-    let square = board.scrollWidth / 8;
+    let board = this.board.current;
+    let square = board.clientWidth / 8;
+
+
     this.setState({
-      boardHeight: board.scrollHeight,
-      boardWidth: board.scrollWidth,
+      boardHeight: board.clientHeight,
+      boardWidth: board.clientWidth,
       squareSize: square,
     })
   }
@@ -105,7 +109,7 @@ export default class Board extends React.Component {
 
   render() {
     return (
-      <div className="board" id="board" >
+      <div className="board" ref={this.board} >
 
         <Piecelist
           gameState={this.state.gameState}

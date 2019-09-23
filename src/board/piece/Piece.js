@@ -3,8 +3,7 @@ import './piece.css'
 
 export default class Piece extends React.Component {
   state = {
-    //pos: this.props.pos, //might not be ideal, look into fixing later
-    dragPos: { x: 0, y: 0 },
+    dragPos: {},
     dragging: false,
     rel: null,
   }
@@ -32,6 +31,7 @@ export default class Piece extends React.Component {
     }
     this.setState({
       dragging: true,
+      dragPos: { x: this.props.pos.x * this.props.squareSize, y: this.props.pos.y * this.props.squareSize },
       rel: updatedRel
     })
     e.stopPropagation();
@@ -42,7 +42,6 @@ export default class Piece extends React.Component {
     this.props.updatePos(this.state.dragPos.x, this.state.dragPos.y, this.props.id, this.props.pos)
     this.setState({
       dragging: false,
-      dragPos: { x: 0, y: 0 }
     });
 
     e.stopPropagation();

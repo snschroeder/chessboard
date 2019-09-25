@@ -1,14 +1,22 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 TODO
+
+    Mentor questions:
+        PieceList and Piece snapshot require a lot of different props. Should I just pass a bunch of stand-in props? Or is that a sign that my data organization/distribution is flawed?
+
+
     Bugs to address:
         react state not updating when checkmate is reached
-        resize issue when sizing down, need to expand it a bit to get the pieces on the board
-        handle castle crashes the engine right now if the rooks have moved
+        handle castle no longer crashes and correctly allows the castling move. Need to render castling now
+            
 
     
     short term goals:
-        get resize working correctly
+
+        add pawn promotion
+        add en passant
+
         display piece graveyard
         display point differential
 

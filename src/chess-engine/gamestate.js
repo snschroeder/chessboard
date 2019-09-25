@@ -1,10 +1,10 @@
-import Board from './board';
-import Rook from './rook';
-import Knight from './knight';
-import Bishop from './bishop';
-import Queen from './queen';
-import King from './king';
-import Pawn from './pawn';
+import Board from './board/board';
+import Rook from './pieces/rook';
+import Knight from './pieces/knight';
+import Bishop from './pieces/bishop';
+import Queen from './pieces/queen';
+import King from './pieces/king';
+import Pawn from './pieces/pawn';
 
 export default class GameState {
     constructor() {
@@ -158,10 +158,12 @@ export default class GameState {
     checkForCastle(king, rooks, color, enemyColor) {
         let enemyMoves = [];
 
+        console.log(rooks)
+
         if (this.checkForCheck(king.position, enemyColor) === 0) {
             if (king.getHasNotMoved()) {
 
-                if (rooks[0].getHasNotMoved()) {
+                if (rooks[0] && rooks[0].position[1] === 0 && rooks[0].getHasNotMoved()) {
                     enemyMoves = this.generateAllMovesByColor(enemyColor);
                     enemyMoves = enemyMoves.filter(move => {
                         if (color === 'white') {
@@ -174,7 +176,6 @@ export default class GameState {
                         && this.board.getPieceBySquare([0, 1]) === null
                         && this.board.getPieceBySquare([0, 2]) === null
                         && color === 'white') {
-
                         king.moves.push([0, 1])
                     } else if (enemyMoves.length === 0
                         && this.board.getPieceBySquare([0, 1]) === null
@@ -183,7 +184,7 @@ export default class GameState {
                         king.moves.push([7, 1])
                     }
 
-                    if (rooks[1].getHasNotMoved()) {
+                    if (rooks[1] && rooks[1].getHasNotMoved()) {
                         enemyMoves = this.generateAllMovesByColor(enemyColor);
                         enemyMoves = enemyMoves.filter(move => {
                             if (color === 'white') {
@@ -197,7 +198,6 @@ export default class GameState {
                             && this.board.getPieceBySquare([0, 5]) === null
                             && this.board.getPieceBySquare([0, 4]) === null
                             && color === 'white') {
-
                             king.moves.push([0, 5]);
                         } else if (enemyMoves.length === 0
                             && this.board.getPieceBySquare([7, 6]) === null
@@ -348,8 +348,6 @@ export default class GameState {
             return;
         }
 
-        //console.log(piece)
-
         console.log(this.currentState[0])
         let currPlayer = this.currentState[0].player;
         let opponent = this.currentState[1].player;
@@ -410,11 +408,3 @@ let gameState = new GameState();
 gameState.initNewGame();
 
 console.log(gameState.board.playArea)
-
-
-
-
-// gameState.turn([1, 4], [3, 4])
-// gameState.turn([6, 2], [4, 2])
-
-// console.log(gameState.board.playArea);

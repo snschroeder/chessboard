@@ -12,8 +12,8 @@ export default class GameState {
         this.moveList = [];
         this.currentMove = ['white', 'black'];
         this.currentState = [
-            { player: 'white', pieceTotal: 0, checkmate: false, stalemate: false },
-            { player: 'black', pieceTotal: 0, checkmate: false, stalemate: false }
+            { player: 'white', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null },
+            { player: 'black', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null }
         ]
     }
 
@@ -155,10 +155,45 @@ export default class GameState {
         }
     }
 
+    handleEnPassant() {
+        if (this.currentState[0].enPass) {
+            let [enemyRank, enemyFile] = this.currentState[0].enPass.position;
+            if (enemyFile + 1 <= 7 && this.board.getPieceBySquare([enemyRank, enemyFile + 1])) {
+                if (this.board.getPieceBySquare([enemyRank, enemyFile + 1]).getName() === 'pawn'
+                    && this.board.getPieceBySquare([enemyRank, enemyFile + 1]).getColor() === this.currentState[0].player) {
+                    if (this.board.getPieceBySquare([enemyRank, enemyFile + 1]).getColor() === 'white') {
+                        console.log(this.board.getPieceBySquare([enemyRank, enemyFile + 1]))
+                        this.board.getPieceBySquare([enemyRank, enemyFile + 1]).moves.push([enemyRank + 1, enemyFile ])
+                    } else {
+                        console.log(this.board.getPieceBySquare([enemyRank, enemyFile + 1]))
+                        this.board.getPieceBySquare([enemyRank, enemyFile + 1]).moves.push([enemyRank - 1, enemyFile ])
+                    }
+                }
+            } else if (enemyFile - 1 > 0 && this.board.getPieceBySquare([enemyRank, enemyFile - 1])) {
+                if (this.board.getPieceBySquare([enemyRank, enemyFile - 1]).getName() === 'pawn'
+                    && this.board.getPieceBySquare([enemyRank, enemyFile - 1]).getColor() === this.currentState[0].player) {
+                    if (this.board.getPieceBySquare([enemyRank, enemyFile - 1]).getColor() === 'white') {
+                        console.log(this.board.getPieceBySquare([enemyRank, enemyFile - 1]))
+                        this.board.getPieceBySquare([enemyRank, enemyFile - 1]).moves.push([enemyRank + 1, enemyFile ])
+                    } else {
+                        console.log(this.board.getPieceBySquare([enemyRank, enemyFile - 1]))
+                        this.board.getPieceBySquare([enemyRank, enemyFile - 1]).moves.push([enemyRank - 1, enemyFile ])
+                    }
+                }
+            }
+
+        }
+    }
+
+    handlePromotion(currentColor) {
+        //if move places white pawn on 8th rank or black pawn on 1st rank
+        //remove pawn
+        //place queen
+        //later we can add an interface to allow the choice
+    };
+
     checkForCastle(king, rooks, color, enemyColor) {
         let enemyMoves = [];
-
-        console.log(rooks)
 
         if (this.checkForCheck(king.position, enemyColor) === 0) {
             if (king.getHasNotMoved()) {
@@ -225,6 +260,7 @@ export default class GameState {
         let rooks = allMoves.filter(piece => piece.name === 'rook');
 
         this.checkForCastle(king, rooks, color, enemyColor)
+        this.handleEnPassant();
 
         allMoves.forEach(piece => piece.moves = piece.moves.filter(move => {
             return !this.moveResultsInCheck(piece, move, king.position, enemyColor)
@@ -274,11 +310,9 @@ export default class GameState {
         if (pieceObj === undefined || pieceObj.moves.length === 0) {
             return false;
         }
-
         let validMove = pieceObj.moves.find(legalMove => {
             return this.posComparator(legalMove, move)
         })
-
         if (validMove !== undefined) {
             return true;
         }
@@ -286,33 +320,18 @@ export default class GameState {
 
 
     move(piecePos, move) {
-
         let legalMoves = this.generateAllLegalMoves(this.currentState[0].player);
-
         let pieceObj = legalMoves.find(piece => this.posComparator(piecePos, piece.position));
-
-        // if (pieceObj === undefined || pieceObj.moves.length === 0) {
-        //     console.log('in the bad if')
-        //     return false;
-        // }
-
-        // // if (pieceObj.color !== this.currentState[0].player) {
-        // //     return false;
-        // // }
 
         if (pieceObj.name === 'king' && Math.abs(piecePos[0] - move[1]) === 2) {
             this.handleCastle(pieceObj, move)
         } else {
-
             let validMove = pieceObj.moves.find(legalMove => {
                 return this.posComparator(legalMove, move)
             })
 
             if (validMove !== undefined) {
                 if (this.board.getSquare(move[0], move[1]).getPiece() !== null) {
-
-                    console.log('inside cap if')
-
                     this.currentState[1].pieceTotal -= this.board.getSquare(validMove[0], validMove[1]).getPiece().value;
                     this.board.getSquare(validMove[0], validMove[1]).removePiece(); //try removing later
                     this.board.getSquare(validMove[0], validMove[1]).setPiece(pieceObj);
@@ -326,6 +345,15 @@ export default class GameState {
                         pieceObj.hasMoved();
                     }
                 } else {
+                    if (pieceObj.name === 'pawn') {
+                        if (pieceObj.position[0] === 1 || pieceObj.position[0] === 6) {
+                            if (validMove[0] === 3 || validMove[0] === 4) {
+                                this.currentState[1].enPass = pieceObj;
+                            } else {
+                                this.currentState[1].enPass = null;
+                            }
+                        }
+                    }
                     this.board.getSquare(validMove[0], validMove[1]).setPiece(pieceObj);
                     this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
                     this.board.getSquare(validMove[0], validMove[1]).getPiece().setPosition([validMove[0], validMove[1]])
@@ -348,7 +376,7 @@ export default class GameState {
             return;
         }
 
-        console.log(this.currentState[0])
+        //console.log(this.currentState[0])
         let currPlayer = this.currentState[0].player;
         let opponent = this.currentState[1].player;
 
@@ -401,10 +429,3 @@ export default class GameState {
 
     posComparator(firstPos, secondPos) { return (firstPos[0] === secondPos[0] && firstPos[1] === secondPos[1]); }
 }
-
-
-
-let gameState = new GameState();
-gameState.initNewGame();
-
-console.log(gameState.board.playArea)

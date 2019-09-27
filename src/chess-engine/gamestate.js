@@ -213,8 +213,8 @@ export default class GameState {
                         && color === 'white') {
                         king.moves.push([0, 1])
                     } else if (enemyMoves.length === 0
-                        && this.board.getPieceBySquare([0, 1]) === null
-                        && this.board.getPieceBySquare([0, 2]) === null
+                        && this.board.getPieceBySquare([7, 1]) === null
+                        && this.board.getPieceBySquare([7, 2]) === null
                         && color === 'black') {
                         king.moves.push([7, 1])
                     }
@@ -275,8 +275,8 @@ export default class GameState {
             rook = this.board.getSquare(0, 0).getPiece();
             this.board.getSquare(move[0], move[1]).setPiece(king)
             this.board.getSquare(0, 2).setPiece(rook);
-            this.board.getSquare(move[0], move[1]).getPiece().setPosition([move[0], move[1]])
-            this.board.getSquare(0, 2).getPiece().setPosition([0, 2])
+            this.board.getSquare(move[0], move[1]).getPiece().setPosition(move)
+            this.board.getSquare(0, 0).getPiece().setPosition([0, 2])
             this.board.getSquare(0, 0).removePiece();
             this.board.getSquare(0, 3).removePiece();
 
@@ -284,6 +284,8 @@ export default class GameState {
             rook = this.board.getSquare(0, 7).getPiece();
             this.board.getSquare(move[0], move[1]).setPiece(king)
             this.board.getSquare(0, 4).setPiece(rook);
+            this.board.getSquare(move[0], move[1]).getPiece().setPosition(move)
+            this.board.getSquare(0, 7).getPiece().setPosition([0, 4])
             this.board.getSquare(0, 7).removePiece();
             this.board.getSquare(0, 3).removePiece();
 
@@ -291,14 +293,18 @@ export default class GameState {
             rook = this.board.getSquare(7, 0).getPiece();
             this.board.getSquare(move[0], move[1]).setPiece(king)
             this.board.getSquare(7, 2).setPiece(rook);
+            this.board.getSquare(move[0], move[1]).getPiece().setPosition(move)
+            this.board.getSquare(7, 0).getPiece().setPosition([7, 2])
             this.board.getSquare(7, 0).removePiece();
             this.board.getSquare(7, 3).removePiece();
 
         } else if (king.color === 'black' && move[1] === 5) {
-            rook = this.board.getSquare(0, 7).getPiece();
+            rook = this.board.getSquare(7, 7).getPiece();
             this.board.getSquare(move[0], move[1]).setPiece(king)
-            this.board.getSquare(0, 4).setPiece(rook);
-            this.board.getSquare(0, 7).removePiece();
+            this.board.getSquare(7, 4).setPiece(rook);
+            this.board.getSquare(move[0], move[1]).getPiece().setPosition(move)
+            this.board.getSquare(7, 7).getPiece().setPosition([7, 4])
+            this.board.getSquare(7, 7).removePiece();
             this.board.getSquare(7, 3).removePiece();
         }
     }
@@ -323,7 +329,8 @@ export default class GameState {
         let legalMoves = this.generateAllLegalMoves(this.currentState[0].player);
         let pieceObj = legalMoves.find(piece => this.posComparator(piecePos, piece.position));
 
-        if (pieceObj.name === 'king' && Math.abs(piecePos[0] - move[1]) === 2) {
+        if (pieceObj.name === 'king' && Math.abs(piecePos[1] - move[1]) === 2) {
+            console.log('in the handler if')
             this.handleCastle(pieceObj, move)
         } else {
             let validMove = pieceObj.moves.find(legalMove => {

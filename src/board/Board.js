@@ -1,12 +1,7 @@
 import React from 'react';
 import './board.css'
-
-//import Square from './square/Square'
-
 import Piecelist from './pieceslist/Piecelist'
 import GameState from '../chess-engine/gamestate';
-
-
 
 export default class Board extends React.Component {
   state = {
@@ -15,7 +10,7 @@ export default class Board extends React.Component {
     squareSize: null,
     gameState: new GameState(),
     pieces: [],
-    currentTurn: this.props.currentTurn
+    //currentTurn: this.props.currentTurn
   }
 
   board = React.createRef();
@@ -24,9 +19,9 @@ export default class Board extends React.Component {
     this.updateDimensions();
     this.state.gameState.initNewGame();
     window.addEventListener('resize', this.updateDimensions);
-    // setTimeout(() => {
-    //   this.setState({ renderPieces: true })
-    // }, 50)
+    setTimeout(() => {
+      this.updatePieceList()
+    }, 50)
   }
 
   componentWillUnmount() {
@@ -36,8 +31,6 @@ export default class Board extends React.Component {
   updateDimensions = () => {
     let board = this.board.current;
     let square = board.clientWidth / 8;
-
-
     this.setState({
       boardHeight: board.clientHeight,
       boardWidth: board.clientWidth,
@@ -45,15 +38,35 @@ export default class Board extends React.Component {
     })
   }
 
-  updatePieceList = (pieceList) => {
+  updatePieceList = () => {
+    const pieceList = this.generatePiecePosition();
     this.setState({ pieces: pieceList })
+  }
+
+  generatePiecePosition = () => {
+    let pieceData = this.state.gameState.board.playArea.map(row => row.map(col => {
+      if (col.getPiece() !== null) {
+        let piece = col.getPiece();
+        return {
+          color: piece.getColor(),
+          notation: piece.notation,
+          pieceType: `${piece.getColor()}-${piece.getName()}`,
+          id: piece.getId(),
+          pos: { x: piece.position[1], y: piece.position[0] }
+        }
+      } else {
+        return null;
+      }
+    }))
+    pieceData = pieceData.flat();
+    pieceData = pieceData.filter(piece => piece !== null)
+    return pieceData;
   }
 
 
 
 
-
-
+  //update to use pieceId to find moving piece rather than position
 
   onChange = (x, y, pieceId, piecePos) => {
     let piecePosArr = [piecePos.y, piecePos.x]
@@ -61,51 +74,18 @@ export default class Board extends React.Component {
     let snapY = Math.round((y / this.state.squareSize));
     let piece;
 
-    this.state.gameState.board.playArea.forEach(row => row.forEach(col => {
-      if (col.position[0] === piecePos.x && col.position[1] === piecePos.y) {
-        piece = col.getPiece()
-      }
-    }))
-
     let move = this.state.gameState.isValidMove(piecePosArr, [snapY, snapX])
 
     if (move) {
-      this.state.gameState.turn(piece, [snapY, snapX])
-
-      let updatedPieces = [];
-      updatedPieces = this.state.pieces.filter(piece => {
-        return !(piece.pos.x === snapX && piece.pos.y === snapY)
-      })
-
-      updatedPieces = updatedPieces.map(piece => {
-        if (piece.id === pieceId) {
-          piece.pos = { x: snapX, y: snapY };
-
-          return piece;
-        } else {
-          return piece
+      this.state.gameState.board.playArea.forEach(row => row.forEach(col => {
+        if (col.position[0] === piecePos.x && col.position[1] === piecePos.y) {
+          piece = col.getPiece()
         }
-      })
-
-      this.setState({
-        pieces: updatedPieces,
-
-      })
+      }))
+      this.state.gameState.turn(piece, [snapY, snapX])
+      this.updatePieceList();
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   render() {
     return (

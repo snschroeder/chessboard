@@ -6,6 +6,7 @@ export default class Piece {
         this.value = value;
         this.board = board;
         this.moves = [];
+        this.id = `${this.color}-${'HGFEDCBA'[this.position[1]]}-${this.name}`
     }
 
     valid_moves() {
@@ -24,10 +25,12 @@ export default class Piece {
         this.moves = generatedMoves.flat();
         return generatedMoves.flat();
     }
+
     setPosition(newPos) {this.position = [...newPos];}
     _generate_move_sequences() {return [];}
     getColor() {return this.color;}
     getPosition() {return this.position;}
     getName() {return this.name;}
     getValue() {return this.value;}
+    getId() {return this.id;}
 }

@@ -1,6 +1,6 @@
 export default class Square {
     constructor(rank, file) {
-        this.letter = 'ABCDEFGH'[file];
+        this.letter = 'HGFEDCBA'[file];
         this.number = rank + 1;
         this.notation = this.letter + this.number;
         this.position = [file, rank];

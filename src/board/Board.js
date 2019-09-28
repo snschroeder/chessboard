@@ -8,9 +8,8 @@ export default class Board extends React.Component {
     boardHeight: null,
     boardWidth: null,
     squareSize: null,
-    gameState: new GameState(),
+    gameState: new GameState(), // can gameState be extracted and passed as a props instead? That would remove the game logic from rendering
     pieces: [],
-    //currentTurn: this.props.currentTurn
   }
 
   board = React.createRef();
@@ -92,11 +91,9 @@ export default class Board extends React.Component {
       <div className="board" ref={this.board} >
 
         <Piecelist
-          gameState={this.state.gameState}
           squareSize={this.state.squareSize}
           pieces={this.state.pieces}
-          updatePos={this.onChange}
-          updatePieces={this.updatePieceList} />
+          updatePos={this.onChange} />
       </div>
     );
   }

@@ -10,7 +10,7 @@ export default class GameState {
     constructor() {
         this.board = new Board()
         this.moveList = [];
-        this.currentMove = ['white', 'black'];
+        //this.currentMove = ['white', 'black'];
         this.currentState = [
             { player: 'white', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null },
             { player: 'black', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null }
@@ -265,6 +265,7 @@ export default class GameState {
         allMoves.forEach(piece => piece.moves = piece.moves.filter(move => {
             return !this.moveResultsInCheck(piece, move, king.position, enemyColor)
         }));
+        console.log(allMoves)
         return allMoves;
     }
 
@@ -279,6 +280,7 @@ export default class GameState {
             this.board.getSquare(0, 0).getPiece().setPosition([0, 2])
             this.board.getSquare(0, 0).removePiece();
             this.board.getSquare(0, 3).removePiece();
+            this.currentState.reverse();
 
         } else if (king.color === 'white' && move[1] === 5) {
             rook = this.board.getSquare(0, 7).getPiece();
@@ -288,6 +290,7 @@ export default class GameState {
             this.board.getSquare(0, 7).getPiece().setPosition([0, 4])
             this.board.getSquare(0, 7).removePiece();
             this.board.getSquare(0, 3).removePiece();
+            this.currentState.reverse();
 
         } else if (king.color === 'black' && move[1] === 1) {
             rook = this.board.getSquare(7, 0).getPiece();
@@ -297,6 +300,7 @@ export default class GameState {
             this.board.getSquare(7, 0).getPiece().setPosition([7, 2])
             this.board.getSquare(7, 0).removePiece();
             this.board.getSquare(7, 3).removePiece();
+            this.currentState.reverse();
 
         } else if (king.color === 'black' && move[1] === 5) {
             rook = this.board.getSquare(7, 7).getPiece();
@@ -306,6 +310,7 @@ export default class GameState {
             this.board.getSquare(7, 7).getPiece().setPosition([7, 4])
             this.board.getSquare(7, 7).removePiece();
             this.board.getSquare(7, 3).removePiece();
+            this.currentState.reverse();
         }
     }
 
@@ -382,30 +387,28 @@ export default class GameState {
             console.log('something went wrong');
             return;
         }
-
-        //console.log(this.currentState[0])
         let currPlayer = this.currentState[0].player;
         let opponent = this.currentState[1].player;
+        this.move(piece.position, move);
 
-        let king = this.board.findKing(currPlayer);
-        let check = this.checkForCheck(king.position, opponent)
-        let legalMoves = this.generateAllLegalMoves(currPlayer)
-        let legalMovesCount = 0;
+        let oppKing = this.board.findKing(opponent);
+        let oppCheck = this.checkForCheck(oppKing.position, currPlayer);
+        let oppLegalMoves = this.generateAllLegalMoves(opponent);
+        let oppLegalMovesCount = 0;
 
-        legalMoves.forEach(piece => {
-            legalMovesCount += piece.moves.length;
+        oppLegalMoves.forEach(piece => {
+            oppLegalMovesCount += piece.moves.length;
         })
-
-        if (legalMovesCount === 0) {
-            if (check > 0) {
-                this.currentState[0].checkmate = true;
-                return `${currPlayer} player is in checkmate`
+        if (oppLegalMovesCount === 0) {
+            if (oppCheck > 0) {
+                this.currentState[1].checkmate = true;
+                console.log(`${opponent} player is in checkmate`)
             } else {
-                this.currentState[0].stalemate = true;
-                return `${currPlayer} player is in stalemate`
+                this.currentState[1].stalemate = true;
+                console.log(`${opponent} player is in stalemate`)
             }
         }
-        this.move(piece.position, move);
+
         this.calculatePieceTotal(currPlayer);
         this.calculatePieceTotal(opponent);
     }

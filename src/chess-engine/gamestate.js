@@ -162,22 +162,18 @@ export default class GameState {
                 if (this.board.getPieceBySquare([enemyRank, enemyFile + 1]).getName() === 'pawn'
                     && this.board.getPieceBySquare([enemyRank, enemyFile + 1]).getColor() === this.currentState[0].player) {
                     if (this.board.getPieceBySquare([enemyRank, enemyFile + 1]).getColor() === 'white') {
-                        console.log(this.board.getPieceBySquare([enemyRank, enemyFile + 1]))
-                        this.board.getPieceBySquare([enemyRank, enemyFile + 1]).moves.push([enemyRank + 1, enemyFile ])
+                        this.board.getPieceBySquare([enemyRank, enemyFile + 1]).moves.push([enemyRank + 1, enemyFile])
                     } else {
-                        console.log(this.board.getPieceBySquare([enemyRank, enemyFile + 1]))
-                        this.board.getPieceBySquare([enemyRank, enemyFile + 1]).moves.push([enemyRank - 1, enemyFile ])
+                        this.board.getPieceBySquare([enemyRank, enemyFile + 1]).moves.push([enemyRank - 1, enemyFile])
                     }
                 }
             } else if (enemyFile - 1 > 0 && this.board.getPieceBySquare([enemyRank, enemyFile - 1])) {
                 if (this.board.getPieceBySquare([enemyRank, enemyFile - 1]).getName() === 'pawn'
                     && this.board.getPieceBySquare([enemyRank, enemyFile - 1]).getColor() === this.currentState[0].player) {
                     if (this.board.getPieceBySquare([enemyRank, enemyFile - 1]).getColor() === 'white') {
-                        console.log(this.board.getPieceBySquare([enemyRank, enemyFile - 1]))
-                        this.board.getPieceBySquare([enemyRank, enemyFile - 1]).moves.push([enemyRank + 1, enemyFile ])
+                        this.board.getPieceBySquare([enemyRank, enemyFile - 1]).moves.push([enemyRank + 1, enemyFile])
                     } else {
-                        console.log(this.board.getPieceBySquare([enemyRank, enemyFile - 1]))
-                        this.board.getPieceBySquare([enemyRank, enemyFile - 1]).moves.push([enemyRank - 1, enemyFile ])
+                        this.board.getPieceBySquare([enemyRank, enemyFile - 1]).moves.push([enemyRank - 1, enemyFile])
                     }
                 }
             }
@@ -265,7 +261,6 @@ export default class GameState {
         allMoves.forEach(piece => piece.moves = piece.moves.filter(move => {
             return !this.moveResultsInCheck(piece, move, king.position, enemyColor)
         }));
-        console.log(allMoves)
         return allMoves;
     }
 
@@ -335,7 +330,6 @@ export default class GameState {
         let pieceObj = legalMoves.find(piece => this.posComparator(piecePos, piece.position));
 
         if (pieceObj.name === 'king' && Math.abs(piecePos[1] - move[1]) === 2) {
-            console.log('in the handler if')
             this.handleCastle(pieceObj, move)
         } else {
             let validMove = pieceObj.moves.find(legalMove => {
@@ -363,6 +357,13 @@ export default class GameState {
                                 this.currentState[1].enPass = pieceObj;
                             } else {
                                 this.currentState[1].enPass = null;
+                            }
+                        }
+
+                        if (pieceObj.position[0] === 3 || pieceObj.position[0] === 4) {
+                            if (validMove[1] === pieceObj.position[1] + 1 || validMove[1] === pieceObj.position[1] - 1) {
+                                let [rank, file] = this.currentState[0].enPass.position
+                                this.board.getSquare(rank, file).removePiece()
                             }
                         }
                     }

@@ -34,27 +34,50 @@ export default class Pawn extends Piece {
     valid_moves() {
         let generatedMoves = this._generate_move_sequences();
 
-        //if moving forward one space would put the pawn off the board in either direction, delete both 
+        // if (this.color === 'white' && this.position[0] === 7) {
+        //     delete generatedMoves.twoSquares; 
+        //     delete generatedMoves.forward
+        //     delete generatedMoves.capRight
+        //     delete generatedMoves.capLeft
+        // }
+
+        // if (this.color === 'black' && this.position[0] === 0) {
+        //     delete generatedMoves.twoSquares; 
+        //     delete generatedMoves.forward
+        //     delete generatedMoves.capRight
+        //     delete generatedMoves.capLeft
+        // }
+
+        if (!this.hasNotMoved) {
+            delete generatedMoves.twoSquares;
+        }
+
+        //if moving forward one space would put the pawn off the board in either direction, delete forward 1 and 2
+
         if (generatedMoves.forward[0] > this.board.getDims() - 1 || generatedMoves.forward[0] < 0) {
             delete generatedMoves.forward;
-            delete generatedMoves.twoSquares;
+            if (generatedMoves.twoSquares !== undefined) {
+                delete generatedMoves.twoSquares;
+            }
         }
         //if forward one space hits a same color piece, delete both forward options
-        if (this.board.getSquare(generatedMoves.forward[0], generatedMoves.forward[1]).getPiece() !== null) {
-            delete generatedMoves.forward;
-            delete generatedMoves.twoSquares;
+        if (generatedMoves[0] <= 7 || generatedMoves[1] >= 0) {
+            if (this.board.getSquare(generatedMoves.forward[0], generatedMoves.forward[1]).getPiece() !== null) {
+                delete generatedMoves.forward;
+                delete generatedMoves.twoSquares;
+            }
         }
         //if forward one space is okay, we need to verify forward 2 spaces is also okay. If not, we delete forward two
-        if (generatedMoves.twoSquares !== undefined) {
+        if (generatedMoves.twoSquares) {
             if (this.board.getSquare(generatedMoves.twoSquares[0], generatedMoves.twoSquares[1]).getPiece() !== null) {
                 delete generatedMoves.twoSquares;
             }
         }
-        if(generatedMoves.twoSquares !== undefined) {
-            if(!this.hasNotMoved) {
-                delete generatedMoves.twoSquares;
-            }
-        }
+        // if(generatedMoves.twoSquares !== undefined) {
+        //     if(!this.hasNotMoved) {
+        //         delete generatedMoves.twoSquares;
+        //     }
+        // }
 
         //check if capturing right is still on the board. If not, remove capRight
         if (generatedMoves.capRight[0] > this.board.getDims() - 1

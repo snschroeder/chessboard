@@ -9,8 +9,6 @@ import Pawn from './pieces/pawn';
 export default class GameState {
     constructor() {
         this.board = new Board()
-        this.moveList = [];
-        //this.currentMove = ['white', 'black'];
         this.currentState = [
             { player: 'white', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null },
             { player: 'black', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null }
@@ -48,7 +46,6 @@ export default class GameState {
 
     calculatePieceTotal(color) {
         let newPieceTotal = 0;
-
         this.board.playArea.forEach(row => row.forEach(col => {
             if (col.getPiece() !== null && col.getPiece().getName() !== 'king') {
                 if (col.getPiece().getColor() === color) {
@@ -71,8 +68,7 @@ export default class GameState {
      * @param {string} color - 'white' or 'black'
      * @returns {array} array of arrays with all possible moves for the color selected
      * 
-     */
-
+     */ 
     generateAllMovesByColor(color) {
         let allMoves = [];
         this.board.playArea.forEach(row => row.forEach(col => {
@@ -89,10 +85,8 @@ export default class GameState {
      * @param {string} color -'white' or 'black'
      * @returns {array} - returns an arrray of objects containing info for all pieces and their moves of the selected color
      */
-
     generateAllMoveInfo(color) {
         let allMoves = [];
-
         this.board.playArea.forEach(row => row.forEach(col => {
             if (col.getPiece() !== null && col.getPiece().getColor() === color) {
                 col.getPiece().valid_moves();
@@ -107,7 +101,6 @@ export default class GameState {
      * @param {array} kingPos - array indicating the king's position on the board 
      * @param {string} attackColor - 'white' or 'black'
      */
-
     checkForCheck(kingPos, attackColor) {
         let attackingMoves = this.generateAllMovesByColor(attackColor);
 
@@ -130,8 +123,6 @@ export default class GameState {
      * @param {string} attackColor -'white' or 'black'
      * @returns {boolean} - returns true if the move puts the moving piece's king in check, false otherwise
      */
-
-
     moveResultsInCheck(piece, move, kingPos, attackColor) {
         let piecePos = piece.position;
         let check;
@@ -181,11 +172,15 @@ export default class GameState {
         }
     }
 
-    handlePromotion(currentColor) {
-        //if move places white pawn on 8th rank or black pawn on 1st rank
-        //remove pawn
-        //place queen
-        //later we can add an interface to allow the choice
+    handlePromotion(pieceObj) {
+        const currColor = pieceObj.color;
+        const [rank, file] = pieceObj.position
+
+        if (currColor === 'white' && rank === 7) {
+            this.board.getSquare(rank, file).setPiece(new Queen(currColor, [rank, file], this.board))
+        } else if(currColor === 'black' && rank === 0) {
+            this.board.getSquare(rank, file).setPiece(new Queen(currColor, [rank, file], this.board))
+        }
     };
 
     checkForCastle(king, rooks, color, enemyColor) {
@@ -243,27 +238,6 @@ export default class GameState {
         }
     }
 
-    /**
-     * 
-     * @param {string} color -'white' or 'black'
-     * @returns {array} - returns an array of objects containing each piece and their legal moves
-     */
-
-    generateAllLegalMoves(color) {
-        let enemyColor = (color === 'white' ? 'black' : 'white');
-        let allMoves = this.generateAllMoveInfo(color);
-        let king = allMoves.find(piece => piece.name === 'king');
-        let rooks = allMoves.filter(piece => piece.name === 'rook');
-
-        this.checkForCastle(king, rooks, color, enemyColor)
-        this.handleEnPassant();
-
-        allMoves.forEach(piece => piece.moves = piece.moves.filter(move => {
-            return !this.moveResultsInCheck(piece, move, king.position, enemyColor)
-        }));
-        return allMoves;
-    }
-
     handleCastle(king, move) {
         let rook;
 
@@ -309,6 +283,27 @@ export default class GameState {
         }
     }
 
+    /**
+     * 
+     * @param {string} color -'white' or 'black'
+     * @returns {array} - returns an array of objects containing each piece and their legal moves
+     */
+
+    generateAllLegalMoves(color) {
+        let enemyColor = (color === 'white' ? 'black' : 'white');
+        let allMoves = this.generateAllMoveInfo(color);
+        let king = allMoves.find(piece => piece.name === 'king');
+        let rooks = allMoves.filter(piece => piece.name === 'rook');
+
+        this.checkForCastle(king, rooks, color, enemyColor)
+        this.handleEnPassant();
+
+        allMoves.forEach(piece => piece.moves = piece.moves.filter(move => {
+            return !this.moveResultsInCheck(piece, move, king.position, enemyColor)
+        }));
+        return allMoves;
+    }
+
     isValidMove(piecePos, move) {
         let legalMoves = this.generateAllLegalMoves(this.currentState[0].player);
         let pieceObj = legalMoves.find(piece => this.posComparator(piecePos, piece.position));
@@ -324,7 +319,8 @@ export default class GameState {
         }
     }
 
-
+    // if statements can be joined - i.e., validMove !== undefined && this.board.blah.blah.blah...
+    // should the capture method be broken out and invoked? Might be preferable. 
     move(piecePos, move) {
         let legalMoves = this.generateAllLegalMoves(this.currentState[0].player);
         let pieceObj = legalMoves.find(piece => this.posComparator(piecePos, piece.position));
@@ -359,7 +355,6 @@ export default class GameState {
                                 this.currentState[1].enPass = null;
                             }
                         }
-
                         if (pieceObj.position[0] === 3 || pieceObj.position[0] === 4) {
                             if (validMove[1] === pieceObj.position[1] + 1 || validMove[1] === pieceObj.position[1] - 1) {
                                 let [rank, file] = this.currentState[0].enPass.position
@@ -392,6 +387,10 @@ export default class GameState {
         let opponent = this.currentState[1].player;
         this.move(piece.position, move);
 
+        if (piece.name === 'pawn') {
+            this.handlePromotion(piece);
+        }
+
         let oppKing = this.board.findKing(opponent);
         let oppCheck = this.checkForCheck(oppKing.position, currPlayer);
         let oppLegalMoves = this.generateAllLegalMoves(opponent);
@@ -419,24 +418,14 @@ export default class GameState {
         this.board.assignNotation();
         this.board.assignColor();
         this.generateStartPosition();
-        //this.rotateBoard();
     }
 
-    getCurrentTurn() {
-        return this.currentState[0].player
-    }
-
-    getGameStatePlayArea() {
-        return this.board.playArea;
-    }
-    getGameStateBoard() {
-        return this.board;
-    }
-
+    getCurrentTurn() {return this.currentState[0].player;}
+    getGameStatePlayArea() {return this.board.playArea;}
+    getGameStateBoard() {return this.board;}
     rotateBoard() {
         this.board.playArea.forEach(row => row.reverse());
         this.board.playArea.reverse();
     }
-
     posComparator(firstPos, secondPos) { return (firstPos[0] === secondPos[0] && firstPos[1] === secondPos[1]); }
 }

@@ -1,48 +1,33 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a chess application built using React. adding a <Board /> component to your application will generate a new chess game.
+All chess rules are applied - i.e., check, checkmate, castling, en passant and pawn promotion all work. 
+The board and pieces will dynamically resize to screen size, and currently drag and drop moves are supported. 
 
 TODO
 
     Mentor questions:
         PieceList and Piece snapshot require a lot of different props. Should I just pass a bunch of stand-in props? Or is that a sign that my data organization/distribution is flawed?
 
-
     Bugs to address:
-        react state not updating when checkmate is reached
-        handle castle no longer crashes and correctly allows the castling move. Need to render castling now
-            
-
+        none that I've currently identified. I'm sure there are more
     
-    short term goals:
-
-        add pawn promotion
-        add en passant
-
+    Short term goals;
         display piece graveyard
         display point differential
-
         spin board and allow 2P 1 comp play
-
         integrate smoke and snapshot tests
 
-        fix display glitch where piece appears in top left immediate on pick up - can we set drag pos to pos?
 
     Long term goals:
-
+        Set up minimax algo with alpha/beta pruning to create a rudimentary bot
+        touch controls
         add option to hightlight valid moves
-
-        integrate stockfish? or other chess engine
-
         integrate customizable turn timer
-
         create websocket to allow online play
-
         create chat
-
         create username/avatar info and display
-
         Chess opening explorer?
-
         chess puzzles?
+
 
 
 ## Available Scripts

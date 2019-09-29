@@ -1,11 +1,15 @@
 This is a chess application built using React. adding a <Board /> component to your application will generate a new chess game.
+
 All chess rules are applied - i.e., check, checkmate, castling, en passant and pawn promotion all work. 
+
 The board and pieces will dynamically resize to screen size, and currently drag and drop moves are supported. 
 
 TODO
 
     Mentor questions:
-        PieceList and Piece snapshot require a lot of different props. Should I just pass a bunch of stand-in props? Or is that a sign that my data organization/distribution is flawed?
+        PieceList and Piece snapshot require a lot of different props. 
+        Should I just pass a bunch of stand-in props? 
+        Or is that a sign that my data organization/distribution is flawed?
 
     Bugs to address:
         none that I've currently identified. I'm sure there are more

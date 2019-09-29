@@ -8,7 +8,7 @@ export default class Board extends React.Component {
     boardHeight: null,
     boardWidth: null,
     squareSize: null,
-    gameState: new GameState(), // can gameState be extracted and passed as a props instead? That would remove the game logic from rendering
+    gameState: this.props.gameState, //new GameState(), // can gameState be extracted and passed as a props instead? That would remove the game logic from rendering
     pieces: [],
   }
 
@@ -62,9 +62,6 @@ export default class Board extends React.Component {
     return pieceData;
   }
 
-
-
-
   //update to use pieceId to find moving piece rather than position
 
   onChange = (x, y, pieceId, piecePos) => {
@@ -87,6 +84,10 @@ export default class Board extends React.Component {
   }
 
   render() {
+    if (this.props.botMoved) {
+      this.updatePieceList();
+      this.props.toggleBotMoved();
+    }
     return (
       <div className="board" ref={this.board} >
 

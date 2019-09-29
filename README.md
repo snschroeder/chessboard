@@ -12,7 +12,7 @@ TODO
         Or is that a sign that my data organization/distribution is flawed?
 
     Bugs to address:
-        none that I've currently identified. I'm sure there are more
+        when an enemy pawn is 1 square directly in front of the enemy king, it registers as an attack, 
     
     Short term goals;
         display piece graveyard

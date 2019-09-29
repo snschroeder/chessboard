@@ -2,10 +2,7 @@ import React from 'react';
 import Piece from '../piece/Piece'
 
 export default class Piecelist extends React.Component {
-    state = {
-        pieces: []
-    }
-
+    
     displayPiecesPos = () => {
         let piecesJSX = this.props.pieces.map(piece => {
             return <Piece

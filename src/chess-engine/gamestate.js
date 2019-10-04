@@ -10,9 +10,11 @@ export default class GameState {
     constructor() {
         this.board = new Board()
         this.currentState = [
-            { player: 'white', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null },
-            { player: 'black', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null }
+            { player: 'white', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null, legalMoves: [] },
+            { player: 'black', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null, legalMoves: [] }
         ]
+        this.currentTurn = 'white';
+        this.lastMove = { prevPos: null, move: null };
     }
 
     generateStartPosition() {
@@ -47,11 +49,11 @@ export default class GameState {
     calculatePieceTotal(color) {
         let newPieceTotal = 0;
         this.board.playArea.forEach(row => row.forEach(col => {
-            if (col.getPiece() !== null && col.getPiece().getName() !== 'king') {
+            if (col.getPiece() !== null) {
                 if (col.getPiece().getColor() === color) {
-                    newPieceTotal += col.getPiece().getValue();
-                }
+                newPieceTotal += col.getPiece().getValue();
             }
+        }
         }))
         this.currentState = this.currentState.map(val => {
             if (val.player === color) {
@@ -63,12 +65,21 @@ export default class GameState {
         })
     }
 
+    evaluateBoard() {
+        this.calculatePieceTotal('white');
+        this.calculatePieceTotal('black');
+        let white = this.currentState.find(player => player.player === 'white');
+        let black = this.currentState.find(player => player.player === 'black');
+
+        return white.pieceTotal - black.pieceTotal;
+    }
+
     /**
      * 
      * @param {string} color - 'white' or 'black'
      * @returns {array} array of arrays with all possible moves for the color selected
      * 
-     */ 
+     */
     generateAllMovesByColor(color) {
         let allMoves = [];
         this.board.playArea.forEach(row => row.forEach(col => {
@@ -103,7 +114,6 @@ export default class GameState {
      */
     checkForCheck(kingPos, attackColor) {
         let attackingMoves = this.generateAllMovesByColor(attackColor);
-
         attackingMoves = attackingMoves.filter(move => this.posComparator(move, kingPos));
 
         if (attackingMoves.length === 1) {
@@ -178,7 +188,7 @@ export default class GameState {
 
         if (currColor === 'white' && rank === 7) {
             this.board.getSquare(rank, file).setPiece(new Queen(currColor, [rank, file], this.board))
-        } else if(currColor === 'black' && rank === 0) {
+        } else if (currColor === 'black' && rank === 0) {
             this.board.getSquare(rank, file).setPiece(new Queen(currColor, [rank, file], this.board))
         }
     };
@@ -301,6 +311,9 @@ export default class GameState {
         allMoves.forEach(piece => piece.moves = piece.moves.filter(move => {
             return !this.moveResultsInCheck(piece, move, king.position, enemyColor)
         }));
+
+        let ind = this.currentState.findIndex(player => player.player === color);
+        this.currentState[ind].legalMoves = allMoves;
         return allMoves;
     }
 
@@ -322,6 +335,7 @@ export default class GameState {
     // if statements can be joined - i.e., validMove !== undefined && this.board.blah.blah.blah...
     // should the capture method be broken out and invoked? Might be preferable. 
     move(piecePos, move) {
+
         let legalMoves = this.generateAllLegalMoves(this.currentState[0].player);
         let pieceObj = legalMoves.find(piece => this.posComparator(piecePos, piece.position));
 
@@ -333,6 +347,12 @@ export default class GameState {
             })
 
             if (validMove !== undefined) {
+
+                // this.lastMove = { piece: pieceObj, prevPos: pieceObj.position, move: validMove }
+                // if (pieceObj.name === 'pawn' || pieceObj.name === 'king' || pieceObj.name === 'rook') {
+                //     this.lastMove.hasNotMoved = pieceObj.getHasNotMoved();
+                // }
+
                 if (this.board.getSquare(move[0], move[1]).getPiece() !== null) {
                     this.currentState[1].pieceTotal -= this.board.getSquare(validMove[0], validMove[1]).getPiece().value;
                     this.board.getSquare(validMove[0], validMove[1]).removePiece(); //try removing later
@@ -379,7 +399,7 @@ export default class GameState {
 
     turn(piece, move) {
 
-        if (piece === null) {
+        if (piece === undefined) {
             console.log('something went wrong');
             return;
         }
@@ -408,10 +428,43 @@ export default class GameState {
                 console.log(`${opponent} player is in stalemate`)
             }
         }
-
         this.calculatePieceTotal(currPlayer);
         this.calculatePieceTotal(opponent);
     }
+
+    // undo() {
+    //     console.log(this.lastMove.prevPos)
+    //     this.board.getPieceBySquare(this.lastMove.move).setPosition(this.lastMove.prevPos);
+    //     //this.board.getSquare(this.lastMove.prevPos).setPiece(this.lastMove.piece)
+    //     if (this.lastMove.hasNotMoved) {
+    //         this.board.getPieceBySquare(this.lastMove.prevPos).setHasNotMoved(this.lastMove(this.lastMove.hasNotMoved))
+    //     }
+    //     this.currentState.reverse();
+    // }
+
+    // simulateTurn(piece, move) {
+    //     let piecePos = piece.position;
+    //     console.log(piecePos)
+    //     let gauge;
+    //     let pieceHolder;
+
+    //     pieceHolder = piece;
+    //     console.log(pieceHolder)
+
+    //     this.board.getSquare(move[0], move[1]).setPiece(piece);
+    //     this.board.getPieceBySquare(...move).setPosition(move)
+    //     this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
+
+    //     gauge = this.evaluateBoard();
+
+    //     this.board.getSquare(piecePos[0], piecePos[1]).setPiece(piece);
+    //     this.board.getSquare(move[0], move[1]).setPiece(pieceHolder);
+
+    //     return gauge;
+    // }
+
+
+
 
     initNewGame() {
         this.board.createBoard();
@@ -420,9 +473,9 @@ export default class GameState {
         this.generateStartPosition();
     }
 
-    getCurrentTurn() {return this.currentState[0].player;}
-    getGameStatePlayArea() {return this.board.playArea;}
-    getGameStateBoard() {return this.board;}
+    getCurrentTurn() { return this.currentState[0].player; }
+    getGameStatePlayArea() { return this.board.playArea; }
+    getGameStateBoard() { return this.board; }
     rotateBoard() {
         this.board.playArea.forEach(row => row.reverse());
         this.board.playArea.reverse();

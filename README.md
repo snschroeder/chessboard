@@ -12,7 +12,12 @@ TODO
         Or is that a sign that my data organization/distribution is flawed?
 
     Bugs to address:
-        when an enemy pawn is 1 square directly in front of the enemy king, it registers as an attack, 
+        when an enemy pawn is 1 square directly in front of the player king, it registers as an attack when it shouldn't
+        when pawns promote, if they're on the d-file, it causes an error due to conflicting keys
+        on promoting a pawn, warning: cannot perform a react state update on an unmounted component
+        verify checkmate works under all cases - rook with rook did not register -- was a timing issue. Bot moved immediately after player moved, state hadn't updated in time
+        undo adds a duplicate piece to piecelist (does not display, though). Might not be a persistent problem once I change how I test it
+
     
     Short term goals;
         display piece graveyard
@@ -24,6 +29,7 @@ TODO
     Long term goals:
         Set up minimax algo with alpha/beta pruning to create a rudimentary bot
         touch controls
+        pawns auto-promote to queens - add option for rook, knight, or bishop
         add option to hightlight valid moves
         integrate customizable turn timer
         create websocket to allow online play

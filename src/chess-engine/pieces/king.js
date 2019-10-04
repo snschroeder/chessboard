@@ -2,7 +2,7 @@ import Piece from './piece';
 
 export default class King extends Piece {
     constructor(color, position, board) {
-        super(color, position, board, 'king', Number.POSITIVE_INFINITY);
+        super(color, position, board, 'king', 9999);
         this.hasNotMoved = true;
         this.board = board;
     }
@@ -27,9 +27,11 @@ export default class King extends Piece {
         moves.push(rankDown);
         moves.push(fileRight);
         moves.push(fileLeft);
+        
         return moves;
     }
 
     getHasNotMoved() { return this.hasNotMoved; }
+    setHasNotMoved(bool) {this.hasNotMoved = bool;}
     hasMoved() { this.hasNotMoved = false; }
 }

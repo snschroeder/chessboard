@@ -83,10 +83,11 @@ export default class Board extends React.Component {
     }
   }
 
-  // handleUndo = () => {
-  //   this.state.gameState.undo();
-  //   this.updatePieceList();
-  // }
+  handleUndo = () => {
+    this.state.gameState.undo();
+    this.updatePieceList();
+  }
+
 
   render() {
     if (this.props.botMoved) {
@@ -94,15 +95,16 @@ export default class Board extends React.Component {
       this.props.toggleBotMoved();
     }
     return (
+      <>
+        <div className="board" ref={this.board} >
 
-      <div className="board" ref={this.board} >
-
-        <Piecelist
-          squareSize={this.state.squareSize}
-          pieces={this.state.pieces}
-          updatePos={this.onChange} />
-      </div>
-
+          <Piecelist
+            squareSize={this.state.squareSize}
+            pieces={this.state.pieces}
+            updatePos={this.onChange} />
+        </div>
+        <button onClick={this.handleUndo}>undo</button>
+      </>
     );
   }
 }

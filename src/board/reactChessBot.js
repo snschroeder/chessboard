@@ -22,11 +22,12 @@ export default class ReactChessBot extends React.Component {
         window.addEventListener('resize', this.updateDimensions);
         setTimeout(() => {
             this.updatePieceList();
-            this.state.chessBot.createPointBoard()
-            this.state.chessBot.popPointBoard(this.state.gameState)
+            // this.state.chessBot.createPointBoard()
+            // this.state.chessBot.popPointBoard(this.state.gameState)
         }, 50)
         setTimeout(() => {
-            let best = this.state.chessBot.findBestMove(this.state.gameState);
+            let best = this.state.chessBot.miniMaxRoot(2, this.state.gameState, true)
+            console.log(best)
             this.state.gameState.turn(best.piece, best.move)
             this.updatePieceList();
         }, 100)
@@ -89,48 +90,20 @@ export default class ReactChessBot extends React.Component {
             }))
             this.state.gameState.turn(piece, [snapY, snapX])
             this.updatePieceList();
-            this.state.chessBot.popPointBoard(this.state.gameState)
+            //this.state.chessBot.popPointBoard(this.state.gameState)
             setTimeout(() => {
-                let best = this.state.chessBot.findBestMove(this.state.gameState);
+                let best = this.state.chessBot.miniMaxRoot(3, this.state.gameState, true);
+                console.log(best)
                 this.state.gameState.turn(best.piece, best.move)
                 this.updatePieceList();
-                console.log(this.state.gameState.evaluateBoard())
-            }, 100);
+            }, 1000);
         }
     }
 
-    // makeRandomMove() {
-    //     if (this.state.gameState.currentState[0].player === 'white') {
-    //         let legalMoves = this.state.gameState.generateAllLegalMoves('white');
-    //         legalMoves = legalMoves.filter(piece => piece.moves.length !== 0);
-    //         const randomPiece = legalMoves[Math.floor(Math.random() * Math.floor(legalMoves.length))]
-    //         let randomMove = randomPiece.moves[Math.floor(Math.random() * Math.floor(randomPiece.moves.length))]
-    //         this.state.gameState.turn(randomPiece, randomMove);
-    //     }
-    // }
-
-    // makeBestMove() {
-    //     if (this.state.gameState.currentState[0].player === 'white') {
-    //         let legalMoves = this.state.gameState.generateAllLegalMoves('white');
-    //         let best = { piece: null, move: null };
-    //         let gauge = this.state.gameState.evaluateBoard();
-
-    //         legalMoves = legalMoves.filter(piece => piece.moves.length !== 0);
-
-    //         legalMoves.forEach(piece => {
-    //             piece.moves.forEach(move => {
-    //                 if (piece && move) {
-    //                     let tmpGauge = this.state.gameState.simulateTurn(piece, move);
-    //                     if (tmpGauge > gauge) {
-    //                         best = { piece, move };
-    //                         gauge = tmpGauge;
-    //                     }
-    //                 }
-    //             })
-    //         })
-    //         this.state.gameState.turn(best.piece, best.move);
-    //     }
-    // }
+    handleUndo = () => {
+        this.state.gameState.undo();
+        this.updatePieceList();
+    }
 
     render() {
         return (
@@ -142,7 +115,7 @@ export default class ReactChessBot extends React.Component {
                         updatePos={this.onChange} />
                 </div>
 
-
+                <button onClick={this.handleUndo}>undo</button>
             </>
         );
     }

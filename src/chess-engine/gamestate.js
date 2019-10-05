@@ -14,7 +14,8 @@ export default class GameState {
             { player: 'black', pieceTotal: 0, checkmate: false, stalemate: false, enPass: null, legalMoves: [] }
         ]
         this.currentTurn = 'white';
-        this.lastMove = { prevPos: null, move: null };
+        this.lastMove = { prevPos: null, move: null, movedPiece: null, capturedPiece: null, hasMoved: null };
+        this.history = [];
     }
 
     generateStartPosition() {
@@ -259,7 +260,7 @@ export default class GameState {
             this.board.getSquare(0, 0).getPiece().setPosition([0, 2])
             this.board.getSquare(0, 0).removePiece();
             this.board.getSquare(0, 3).removePiece();
-            this.currentState.reverse();
+            // this.currentState.reverse();
 
         } else if (king.color === 'white' && move[1] === 5) {
             rook = this.board.getSquare(0, 7).getPiece();
@@ -269,7 +270,7 @@ export default class GameState {
             this.board.getSquare(0, 7).getPiece().setPosition([0, 4])
             this.board.getSquare(0, 7).removePiece();
             this.board.getSquare(0, 3).removePiece();
-            this.currentState.reverse();
+            // this.currentState.reverse();
 
         } else if (king.color === 'black' && move[1] === 1) {
             rook = this.board.getSquare(7, 0).getPiece();
@@ -279,7 +280,7 @@ export default class GameState {
             this.board.getSquare(7, 0).getPiece().setPosition([7, 2])
             this.board.getSquare(7, 0).removePiece();
             this.board.getSquare(7, 3).removePiece();
-            this.currentState.reverse();
+            // this.currentState.reverse();
 
         } else if (king.color === 'black' && move[1] === 5) {
             rook = this.board.getSquare(7, 7).getPiece();
@@ -289,7 +290,7 @@ export default class GameState {
             this.board.getSquare(7, 7).getPiece().setPosition([7, 4])
             this.board.getSquare(7, 7).removePiece();
             this.board.getSquare(7, 3).removePiece();
-            this.currentState.reverse();
+            // this.currentState.reverse();
         }
     }
 
@@ -334,11 +335,12 @@ export default class GameState {
 
     // if statements can be joined - i.e., validMove !== undefined && this.board.blah.blah.blah...
     // should the capture method be broken out and invoked? Might be preferable. 
-    move(piecePos, move) {
+    move(pieceObj, move) {
+        //let legalMoves = this.generateAllLegalMoves(this.currentState[0].player);
+        //let pieceObj = legalMoves.find(piece => this.posComparator(piecePos, piece.position));
+        //console.log(piecePos)
 
-        let legalMoves = this.generateAllLegalMoves(this.currentState[0].player);
-        let pieceObj = legalMoves.find(piece => this.posComparator(piecePos, piece.position));
-
+        let piecePos = pieceObj.position;
         if (pieceObj.name === 'king' && Math.abs(piecePos[1] - move[1]) === 2) {
             this.handleCastle(pieceObj, move)
         } else {
@@ -348,10 +350,17 @@ export default class GameState {
 
             if (validMove !== undefined) {
 
-                // this.lastMove = { piece: pieceObj, prevPos: pieceObj.position, move: validMove }
-                // if (pieceObj.name === 'pawn' || pieceObj.name === 'king' || pieceObj.name === 'rook') {
-                //     this.lastMove.hasNotMoved = pieceObj.getHasNotMoved();
-                // }
+                let capPiece = this.board.getSquare(move[0], move[1]).getPiece();
+                let hasMovedProp = Object.keys(pieceObj).includes('hasNotMoved');
+
+                this.lastMove = { movedPiece: pieceObj, prevPos: pieceObj.position, move: validMove , capturedPiece: capPiece }
+
+                if (hasMovedProp) {
+                    this.lastMove.hasMoved = pieceObj.hasNotMoved;
+                } else {
+                    this.lastMove.hasMove = null;
+                }
+                this.history.push(this.lastMove)
 
                 if (this.board.getSquare(move[0], move[1]).getPiece() !== null) {
                     this.currentState[1].pieceTotal -= this.board.getSquare(validMove[0], validMove[1]).getPiece().value;
@@ -359,7 +368,7 @@ export default class GameState {
                     this.board.getSquare(validMove[0], validMove[1]).setPiece(pieceObj);
                     this.board.getSquare(validMove[0], validMove[1]).getPiece().setPosition([validMove[0], validMove[1]])
                     this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
-                    this.currentState.reverse();
+                    //this.currentState.reverse();
 
                     if (pieceObj.name === 'king'
                         || pieceObj.name === 'rook'
@@ -378,6 +387,7 @@ export default class GameState {
                         if (pieceObj.position[0] === 3 || pieceObj.position[0] === 4) {
                             if (validMove[1] === pieceObj.position[1] + 1 || validMove[1] === pieceObj.position[1] - 1) {
                                 let [rank, file] = this.currentState[0].enPass.position
+                                this.lastMove.capturedPiece = this.currentState[0].enPass;
                                 this.board.getSquare(rank, file).removePiece()
                             }
                         }
@@ -385,7 +395,7 @@ export default class GameState {
                     this.board.getSquare(validMove[0], validMove[1]).setPiece(pieceObj);
                     this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
                     this.board.getSquare(validMove[0], validMove[1]).getPiece().setPosition([validMove[0], validMove[1]])
-                    this.currentState.reverse();
+                    //this.currentState.reverse();
 
                     if (pieceObj.name === 'king'
                         || pieceObj.name === 'rook'
@@ -393,25 +403,27 @@ export default class GameState {
                         pieceObj.hasMoved();
                     }
                 }
+
             }
         }
+        //this.currentState.reverse();
     }
 
     turn(piece, move) {
 
-        if (piece === undefined) {
-            console.log('something went wrong');
-            return;
-        }
+
         let currPlayer = this.currentState[0].player;
         let opponent = this.currentState[1].player;
-        this.move(piece.position, move);
+        this.move(piece, move);
+        this.currentState.reverse()
 
         if (piece.name === 'pawn') {
             this.handlePromotion(piece);
         }
 
         let oppKing = this.board.findKing(opponent);
+
+        console.log(oppKing)
         let oppCheck = this.checkForCheck(oppKing.position, currPlayer);
         let oppLegalMoves = this.generateAllLegalMoves(opponent);
         let oppLegalMovesCount = 0;
@@ -432,39 +444,26 @@ export default class GameState {
         this.calculatePieceTotal(opponent);
     }
 
-    // undo() {
-    //     console.log(this.lastMove.prevPos)
-    //     this.board.getPieceBySquare(this.lastMove.move).setPosition(this.lastMove.prevPos);
-    //     //this.board.getSquare(this.lastMove.prevPos).setPiece(this.lastMove.piece)
-    //     if (this.lastMove.hasNotMoved) {
-    //         this.board.getPieceBySquare(this.lastMove.prevPos).setHasNotMoved(this.lastMove(this.lastMove.hasNotMoved))
-    //     }
-    //     this.currentState.reverse();
-    // }
+    undo() {
+        if (this.history.length === 0) {
+            return 'no moves to undo'
+        }
+        this.board.getSquare(...this.history[this.history.length - 1].prevPos).setPiece(this.history[this.history.length - 1].movedPiece);
+        this.board.getSquare(...this.history[this.history.length - 1].prevPos).getPiece().setPosition(this.history[this.history.length - 1].prevPos);
+        this.board.getSquare(...this.history[this.history.length - 1].move).removePiece();
 
-    // simulateTurn(piece, move) {
-    //     let piecePos = piece.position;
-    //     console.log(piecePos)
-    //     let gauge;
-    //     let pieceHolder;
+        if (this.history[this.history.length - 1].capturedPiece) {
+            this.board.getSquare(...this.history[this.history.length - 1].move).setPiece(this.history[this.history.length - 1].capturedPiece);
+            this.board.getSquare(...this.history[this.history.length - 1].move).getPiece().setPosition(this.history[this.history.length - 1].move);
+        }
 
-    //     pieceHolder = piece;
-    //     console.log(pieceHolder)
+        if(this.history[this.history.length - 1].hasMoved !== null) {
+            this.board.getPieceBySquare(this.history[this.history.length - 1].prevPos).hasNotMoved = this.history[this.history.length - 1].hasMoved;
+        }
+        this.history.pop();
+        this.currentState.reverse()
 
-    //     this.board.getSquare(move[0], move[1]).setPiece(piece);
-    //     this.board.getPieceBySquare(...move).setPosition(move)
-    //     this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
-
-    //     gauge = this.evaluateBoard();
-
-    //     this.board.getSquare(piecePos[0], piecePos[1]).setPiece(piece);
-    //     this.board.getSquare(move[0], move[1]).setPiece(pieceHolder);
-
-    //     return gauge;
-    // }
-
-
-
+    }
 
     initNewGame() {
         this.board.createBoard();
@@ -476,9 +475,9 @@ export default class GameState {
     getCurrentTurn() { return this.currentState[0].player; }
     getGameStatePlayArea() { return this.board.playArea; }
     getGameStateBoard() { return this.board; }
-    rotateBoard() {
-        this.board.playArea.forEach(row => row.reverse());
-        this.board.playArea.reverse();
-    }
+    // rotateBoard() {
+    //     this.board.playArea.forEach(row => row.reverse());
+    //     this.board.playArea.reverse();
+    // }
     posComparator(firstPos, secondPos) { return (firstPos[0] === secondPos[0] && firstPos[1] === secondPos[1]); }
 }

@@ -6,4 +6,4 @@ import ReactChessBot from './board/reactChessBot'
 
 
 
-ReactDOM.render(<ReactChessBot  />, document.getElementById('root'));
+ReactDOM.render(<Board  />, document.getElementById('root'));

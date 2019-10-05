@@ -6,12 +6,12 @@ import GameState from '../chess-engine/gamestate'
 
 export default class ReactChessBot extends React.Component {
     state = {
-        chessBot: new ChessBot(),
         boardHeight: null,
         boardWidth: null,
         squareSize: null,
         gameState: new GameState(), // can gameState be extracted and passed as a props instead? That would remove the game logic from rendering
         pieces: [],
+        chessBot: new ChessBot()
     }
 
     board = React.createRef();
@@ -22,9 +22,12 @@ export default class ReactChessBot extends React.Component {
         window.addEventListener('resize', this.updateDimensions);
         setTimeout(() => {
             this.updatePieceList();
+            this.state.chessBot.createPointBoard()
+            this.state.chessBot.popPointBoard(this.state.gameState)
         }, 50)
         setTimeout(() => {
-            this.makeRandomMove();
+            let best = this.state.chessBot.findBestMove(this.state.gameState);
+            this.state.gameState.turn(best.piece, best.move)
             this.updatePieceList();
         }, 100)
     }
@@ -86,23 +89,25 @@ export default class ReactChessBot extends React.Component {
             }))
             this.state.gameState.turn(piece, [snapY, snapX])
             this.updatePieceList();
+            this.state.chessBot.popPointBoard(this.state.gameState)
             setTimeout(() => {
-                this.makeRandomMove();
+                let best = this.state.chessBot.findBestMove(this.state.gameState);
+                this.state.gameState.turn(best.piece, best.move)
                 this.updatePieceList();
                 console.log(this.state.gameState.evaluateBoard())
             }, 100);
         }
     }
 
-    makeRandomMove() {
-        if (this.state.gameState.currentState[0].player === 'white') {
-            let legalMoves = this.state.gameState.generateAllLegalMoves('white');
-            legalMoves = legalMoves.filter(piece => piece.moves.length !== 0);
-            const randomPiece = legalMoves[Math.floor(Math.random() * Math.floor(legalMoves.length))]
-            let randomMove = randomPiece.moves[Math.floor(Math.random() * Math.floor(randomPiece.moves.length))]
-            this.state.gameState.turn(randomPiece, randomMove);
-        }
-    }
+    // makeRandomMove() {
+    //     if (this.state.gameState.currentState[0].player === 'white') {
+    //         let legalMoves = this.state.gameState.generateAllLegalMoves('white');
+    //         legalMoves = legalMoves.filter(piece => piece.moves.length !== 0);
+    //         const randomPiece = legalMoves[Math.floor(Math.random() * Math.floor(legalMoves.length))]
+    //         let randomMove = randomPiece.moves[Math.floor(Math.random() * Math.floor(randomPiece.moves.length))]
+    //         this.state.gameState.turn(randomPiece, randomMove);
+    //     }
+    // }
 
     // makeBestMove() {
     //     if (this.state.gameState.currentState[0].player === 'white') {

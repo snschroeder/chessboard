@@ -18,6 +18,8 @@ TODO
         verify checkmate works under all cases - rook with rook did not register -- was a timing issue. Bot moved immediately after player moved, state hadn't updated in time
         undo adds a duplicate piece to piecelist (does not display, though). Might not be a persistent problem once I change how I test it
 
+        bot en passant doing something weird - a4, a5, b4, b6, bxa5, bxa5, c4, c5, d4, cxd4, then it captures en passant from c4??
+
     
     Short term goals;
         display piece graveyard

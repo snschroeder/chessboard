@@ -61,12 +61,12 @@ export default class Pawn extends Piece {
             }
         }
         //if forward one space hits a same color piece, delete both forward options
-        if (generatedMoves[0] <= 7 || generatedMoves[1] >= 0) {
-            if (this.board.getSquare(generatedMoves.forward[0], generatedMoves.forward[1]).getPiece() !== null) {
-                delete generatedMoves.forward;
-                delete generatedMoves.twoSquares;
-            }
+
+        if (this.board.getSquare(generatedMoves.forward[0], generatedMoves.forward[1]).getPiece() !== null) {
+            delete generatedMoves.forward;
+            delete generatedMoves.twoSquares;
         }
+
         //if forward one space is okay, we need to verify forward 2 spaces is also okay. If not, we delete forward two
         if (generatedMoves.twoSquares) {
             if (this.board.getSquare(generatedMoves.twoSquares[0], generatedMoves.twoSquares[1]).getPiece() !== null) {
@@ -112,6 +112,6 @@ export default class Pawn extends Piece {
     }
 
     getHasNotMoved() { return this.hasNotMoved; }
-    setHasNotMoved(bool) {this.hasNotMoved = bool;}
+    setHasNotMoved(bool) { this.hasNotMoved = bool; }
     hasMoved() { this.hasNotMoved = false; }
 }

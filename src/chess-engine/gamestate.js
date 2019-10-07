@@ -52,9 +52,9 @@ export default class GameState {
         this.board.playArea.forEach(row => row.forEach(col => {
             if (col.getPiece() !== null) {
                 if (col.getPiece().getColor() === color) {
-                newPieceTotal += col.getPiece().getValue();
+                    newPieceTotal += col.getPiece().getValue();
+                }
             }
-        }
         }))
         this.currentState = this.currentState.map(val => {
             if (val.player === color) {
@@ -260,7 +260,6 @@ export default class GameState {
             this.board.getSquare(0, 0).getPiece().setPosition([0, 2])
             this.board.getSquare(0, 0).removePiece();
             this.board.getSquare(0, 3).removePiece();
-            // this.currentState.reverse();
 
         } else if (king.color === 'white' && move[1] === 5) {
             rook = this.board.getSquare(0, 7).getPiece();
@@ -270,7 +269,6 @@ export default class GameState {
             this.board.getSquare(0, 7).getPiece().setPosition([0, 4])
             this.board.getSquare(0, 7).removePiece();
             this.board.getSquare(0, 3).removePiece();
-            // this.currentState.reverse();
 
         } else if (king.color === 'black' && move[1] === 1) {
             rook = this.board.getSquare(7, 0).getPiece();
@@ -280,7 +278,6 @@ export default class GameState {
             this.board.getSquare(7, 0).getPiece().setPosition([7, 2])
             this.board.getSquare(7, 0).removePiece();
             this.board.getSquare(7, 3).removePiece();
-            // this.currentState.reverse();
 
         } else if (king.color === 'black' && move[1] === 5) {
             rook = this.board.getSquare(7, 7).getPiece();
@@ -290,7 +287,6 @@ export default class GameState {
             this.board.getSquare(7, 7).getPiece().setPosition([7, 4])
             this.board.getSquare(7, 7).removePiece();
             this.board.getSquare(7, 3).removePiece();
-            // this.currentState.reverse();
         }
     }
 
@@ -304,6 +300,13 @@ export default class GameState {
         let enemyColor = (color === 'white' ? 'black' : 'white');
         let allMoves = this.generateAllMoveInfo(color);
         let king = allMoves.find(piece => piece.name === 'king');
+        let enemyKing = this.board.findKing(enemyColor)
+
+
+        // console.log(`the ${enemyKing.color} king is on the board at position ${enemyKing.position}`)
+        // console.log(`the ${king.color} king is on the board at position ${king.position}`)
+
+
         let rooks = allMoves.filter(piece => piece.name === 'rook');
 
         this.checkForCastle(king, rooks, color, enemyColor)
@@ -312,6 +315,10 @@ export default class GameState {
         allMoves.forEach(piece => piece.moves = piece.moves.filter(move => {
             return !this.moveResultsInCheck(piece, move, king.position, enemyColor)
         }));
+
+        allMoves.forEach(piece => piece.moves.filter(move => {
+            return !this.posComparator(enemyKing.position, move)
+        }))
 
         let ind = this.currentState.findIndex(player => player.player === color);
         this.currentState[ind].legalMoves = allMoves;
@@ -335,87 +342,84 @@ export default class GameState {
 
     // if statements can be joined - i.e., validMove !== undefined && this.board.blah.blah.blah...
     // should the capture method be broken out and invoked? Might be preferable. 
-    move(pieceObj, move) {
+
+    makeMove(pieceObj, move) {
+
         //let legalMoves = this.generateAllLegalMoves(this.currentState[0].player);
         //let pieceObj = legalMoves.find(piece => this.posComparator(piecePos, piece.position));
         //console.log(piecePos)
 
         let piecePos = pieceObj.position;
+
         if (pieceObj.name === 'king' && Math.abs(piecePos[1] - move[1]) === 2) {
             this.handleCastle(pieceObj, move)
-        } else {
-            let validMove = pieceObj.moves.find(legalMove => {
-                return this.posComparator(legalMove, move)
-            })
+        }
+        // } else {
+        //     let validMove = pieceObj.moves.find(legalMove => {
+        //         return this.posComparator(legalMove, move)
+        //     })
+        //}
 
-            if (validMove !== undefined) {
+        if (move !== undefined) {
+            let capPiece = this.board.getSquare(move[0], move[1]).getPiece();
+            let hasMovedProp = Object.keys(pieceObj).includes('hasNotMoved');
+            this.lastMove = { movedPiece: pieceObj, prevPos: pieceObj.position, move: move, capturedPiece: capPiece }
+            if (hasMovedProp) {
+                this.lastMove.hasMoved = pieceObj.hasNotMoved;
+            } else {
+                this.lastMove.hasMove = null;
+            }
+            this.history.push(this.lastMove)
 
-                let capPiece = this.board.getSquare(move[0], move[1]).getPiece();
-                let hasMovedProp = Object.keys(pieceObj).includes('hasNotMoved');
+            if (this.board.getSquare(move[0], move[1]).getPiece() !== null) {
+                this.currentState[1].pieceTotal -= this.board.getSquare(move[0], move[1]).getPiece().value;
+                this.board.getSquare(move[0], move[1]).removePiece(); //try removing later
+                this.board.getSquare(move[0], move[1]).setPiece(pieceObj);
+                this.board.getSquare(move[0], move[1]).getPiece().setPosition([move[0], move[1]])
+                this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
 
-                this.lastMove = { movedPiece: pieceObj, prevPos: pieceObj.position, move: validMove , capturedPiece: capPiece }
-
-                if (hasMovedProp) {
-                    this.lastMove.hasMoved = pieceObj.hasNotMoved;
-                } else {
-                    this.lastMove.hasMove = null;
+                if (pieceObj.name === 'king'
+                    || pieceObj.name === 'rook'
+                    || pieceObj.name === 'pawn') {
+                    pieceObj.hasMoved();
                 }
-                this.history.push(this.lastMove)
-
-                if (this.board.getSquare(move[0], move[1]).getPiece() !== null) {
-                    this.currentState[1].pieceTotal -= this.board.getSquare(validMove[0], validMove[1]).getPiece().value;
-                    this.board.getSquare(validMove[0], validMove[1]).removePiece(); //try removing later
-                    this.board.getSquare(validMove[0], validMove[1]).setPiece(pieceObj);
-                    this.board.getSquare(validMove[0], validMove[1]).getPiece().setPosition([validMove[0], validMove[1]])
-                    this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
-                    //this.currentState.reverse();
-
-                    if (pieceObj.name === 'king'
-                        || pieceObj.name === 'rook'
-                        || pieceObj.name === 'pawn') {
-                        pieceObj.hasMoved();
-                    }
-                } else {
-                    if (pieceObj.name === 'pawn') {
-                        if (pieceObj.position[0] === 1 || pieceObj.position[0] === 6) {
-                            if (validMove[0] === 3 || validMove[0] === 4) {
-                                this.currentState[1].enPass = pieceObj;
-                            } else {
-                                this.currentState[1].enPass = null;
-                            }
-                        }
-                        if (pieceObj.position[0] === 3 || pieceObj.position[0] === 4) {
-                            if (validMove[1] === pieceObj.position[1] + 1 || validMove[1] === pieceObj.position[1] - 1) {
-                                let [rank, file] = this.currentState[0].enPass.position
-                                this.lastMove.capturedPiece = this.currentState[0].enPass;
-                                this.board.getSquare(rank, file).removePiece()
-                            }
+            } else {
+                if (pieceObj.name === 'pawn') {
+                    if (pieceObj.position[0] === 1 || pieceObj.position[0] === 6) {
+                        if (move[0] === 3 || move[0] === 4) {
+                            this.currentState[1].enPass = pieceObj;
+                        } else {
+                            this.currentState[1].enPass = null;
                         }
                     }
-                    this.board.getSquare(validMove[0], validMove[1]).setPiece(pieceObj);
-                    this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
-                    this.board.getSquare(validMove[0], validMove[1]).getPiece().setPosition([validMove[0], validMove[1]])
-                    //this.currentState.reverse();
-
-                    if (pieceObj.name === 'king'
-                        || pieceObj.name === 'rook'
-                        || pieceObj.name === 'pawn') {
-                        pieceObj.hasMoved();
+                    if (pieceObj.position[0] === 3 || pieceObj.position[0] === 4) {
+                        if (move[1] === pieceObj.position[1] + 1 || move[1] === pieceObj.position[1] - 1) {
+                            let [rank, file] = this.currentState[0].enPass.position
+                            this.lastMove.capturedPiece = this.currentState[0].enPass;
+                            this.board.getSquare(rank, file).removePiece()
+                        }
                     }
                 }
+                this.board.getSquare(move[0], move[1]).setPiece(pieceObj);
+                this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
+                this.board.getSquare(move[0], move[1]).getPiece().setPosition([move[0], move[1]])
 
+                if (pieceObj.name === 'king'
+                    || pieceObj.name === 'rook'
+                    || pieceObj.name === 'pawn') {
+                    pieceObj.hasMoved();
+                }
             }
         }
-        //this.currentState.reverse();
     }
 
+
     turn(piece, move) {
-
-
         let currPlayer = this.currentState[0].player;
         let opponent = this.currentState[1].player;
-        this.move(piece, move);
-        this.currentState.reverse()
+        this.makeMove(piece, move);
+        this.currentState.reverse();
+
 
         if (piece.name === 'pawn') {
             this.handlePromotion(piece);
@@ -423,7 +427,6 @@ export default class GameState {
 
         let oppKing = this.board.findKing(opponent);
 
-        console.log(oppKing)
         let oppCheck = this.checkForCheck(oppKing.position, currPlayer);
         let oppLegalMoves = this.generateAllLegalMoves(opponent);
         let oppLegalMovesCount = 0;
@@ -457,7 +460,7 @@ export default class GameState {
             this.board.getSquare(...this.history[this.history.length - 1].move).getPiece().setPosition(this.history[this.history.length - 1].move);
         }
 
-        if(this.history[this.history.length - 1].hasMoved !== null) {
+        if (this.history[this.history.length - 1].hasMoved !== null) {
             this.board.getPieceBySquare(this.history[this.history.length - 1].prevPos).hasNotMoved = this.history[this.history.length - 1].hasMoved;
         }
         this.history.pop();

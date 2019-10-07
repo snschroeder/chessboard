@@ -78,27 +78,42 @@ export default class ChessBot {
     }
 
     miniMaxRoot(depth, game, isMaxPlayer) {
-        let moves = game.generateAllLegalMoves(isMaxPlayer ? 'white' : 'black');
+        let color;
+        if (isMaxPlayer) {
+            color = 'white';
+        } else {
+            color = 'black';
+        }
+        let moves = game.generateAllLegalMoves('white');
         let bestEval = -9999;
         let best = { piece: null, move: null }; 
+        console.log(game.board.findKing(color))
 
         moves.forEach(piece => {
             piece.moves.forEach(move => {
                 game.turn(piece, move)
                 let val = this.miniMax(depth - 1, game, !isMaxPlayer);
                 game.undo();
+
+                console.log(val)
                 if (val >= bestEval) {
                     bestEval = val;
                     best = { piece, move };
                 }
             })
         })
+        console.log('final: ' + bestEval)
+        if (bestEval === 0) {
+            best = this.pickRandomMove(game)
+        }
+        console.log(best.piece)
+        console.log(best.move)
         return best;
     }
 
     miniMax(depth, game, isMaxPlayer) {
-        if (depth === 0) {
-            return game.evaluateBoard();
+        if (depth === 0 || game.currentState[0].checkmate || game.currentState[1].checkmate) {
+            return - game.evaluateBoard();
             
         }
         //let moves = game.generateAllLegalMoves(isMaxPlayer ? 'white' : 'black');
@@ -115,6 +130,7 @@ export default class ChessBot {
                     game.undo();
                 })
             })
+            //console.log('white player best: ' + bestEval)
             return bestEval;
         } else {
             let moves = game.generateAllLegalMoves('black')
@@ -126,6 +142,7 @@ export default class ChessBot {
                     game.undo();
                 })
             })
+            //console.log('black player best: ' + bestEval)
             return bestEval;
         }
     }

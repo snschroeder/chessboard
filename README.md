@@ -12,13 +12,12 @@ TODO
         Or is that a sign that my data organization/distribution is flawed?
 
     Bugs to address:
-        when an enemy pawn is 1 square directly in front of the player king, it registers as an attack when it shouldn't
-        when pawns promote, if they're on the d-file, it causes an error due to conflicting keys
-        on promoting a pawn, warning: cannot perform a react state update on an unmounted component
+        when pawns promote, if they're on the d-file, it causes an error due to conflicting keys with the player's existing queen
+        on promoting a pawn, warning: cannot perform a react state update on an unmounted component - might need to terminate the event listener first before replacing?
         verify checkmate works under all cases - rook with rook did not register -- was a timing issue. Bot moved immediately after player moved, state hadn't updated in time
-        undo adds a duplicate piece to piecelist (does not display, though). Might not be a persistent problem once I change how I test it
 
         bot en passant doing something weird - a4, a5, b4, b6, bxa5, bxa5, c4, c5, d4, cxd4, then it captures en passant from c4??
+        undoing en passant puts the captured pawn in the wrong place. 
 
     
     Short term goals;

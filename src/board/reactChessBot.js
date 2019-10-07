@@ -26,11 +26,10 @@ export default class ReactChessBot extends React.Component {
             // this.state.chessBot.popPointBoard(this.state.gameState)
         }, 50)
         setTimeout(() => {
-            let best = this.state.chessBot.miniMaxRoot(2, this.state.gameState, true)
-            console.log(best)
+            let best = this.state.chessBot.miniMaxRoot(3, this.state.gameState, true)
             this.state.gameState.turn(best.piece, best.move)
             this.updatePieceList();
-        }, 100)
+        }, 300)
     }
 
     componentWillUnmount() {

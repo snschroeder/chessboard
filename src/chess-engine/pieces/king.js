@@ -2,7 +2,7 @@ import Piece from './piece';
 
 export default class King extends Piece {
     constructor(color, position, board) {
-        super(color, position, board, 'king', 9999);
+        super(color, position, board, 'king', 0);
         this.hasNotMoved = true;
         this.board = board;
     }

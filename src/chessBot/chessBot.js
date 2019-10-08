@@ -87,7 +87,6 @@ export default class ChessBot {
         let moves = game.generateAllLegalMoves('white');
         let bestEval = -9999;
         let best = { piece: null, move: null }; 
-        console.log(game.board.findKing(color))
 
         moves.forEach(piece => {
             piece.moves.forEach(move => {
@@ -112,16 +111,17 @@ export default class ChessBot {
     }
 
     miniMax(depth, game, isMaxPlayer) {
-        if (depth === 0 || game.currentState[0].checkmate || game.currentState[1].checkmate) {
-            return - game.evaluateBoard();
+        if (depth === 0 || game.currentState[0].checkmate || game.currentState[1].checkmate || game.currentState[0].stalemate || game.currentState[1].stalemate) {
+            return game.evaluateBoard();
             
         }
         //let moves = game.generateAllLegalMoves(isMaxPlayer ? 'white' : 'black');
+        let bestEval;
 
         if (isMaxPlayer) {
 
             let moves = game.generateAllLegalMoves('white')
-            let bestEval = -9999;
+            bestEval = -9999;
 
             moves.forEach(piece => {
                 piece.moves.forEach(move => {
@@ -134,7 +134,7 @@ export default class ChessBot {
             return bestEval;
         } else {
             let moves = game.generateAllLegalMoves('black')
-            let bestEval = 9999;
+            bestEval = 9999;
             moves.forEach(piece => {
                 piece.moves.forEach(move => {
                     game.turn(piece, move)

@@ -19,6 +19,12 @@ TODO
         bot en passant doing something weird - a4, a5, b4, b6, bxa5, bxa5, c4, c5, d4, cxd4, then it captures en passant from c4??
         undoing en passant puts the captured pawn in the wrong place. 
 
+        minimax notes:
+            it seems the queen is interacting with the same color king, potentially crashing the engine. 
+            Removing the queens, the engine will run until the bot encounters a situation where one of the kings is in check or otherwise needed for a method
+                it seems the king moves in a way that is unexpected, or is erroneously captured
+                also, enpassant and castling are currently disabled
+
     
     Short term goals;
         display piece graveyard

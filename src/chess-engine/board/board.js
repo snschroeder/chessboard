@@ -41,11 +41,11 @@ export default class Board {
         let piece;
         this.playArea.forEach(row => row.forEach(col => {
             if (col.getPiece() !== null) {
-                if (col.getPiece().getName() === 'king' && col.getPiece().getColor() === color) {
+                if (col.getPiece().getName() === 'king' && col.getPiece().color === color) {
                     piece = col.getPiece();
                 }
             }
-        }))  
+        })) 
         return piece;
     }
 

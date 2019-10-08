@@ -26,7 +26,7 @@ export default class GameState {
         pieces.push(new Knight('white', [0, 6], this.board));
         pieces.push(new Bishop('white', [0, 2], this.board));
         pieces.push(new Bishop('white', [0, 5], this.board));
-        pieces.push(new Queen('white', [0, 4], this.board));
+        //pieces.push(new Queen('white', [0, 4], this.board));
         pieces.push(new King('white', [0, 3], this.board));
         for (let i = 0; i < this.board.getDims(); i++) {
             pieces.push(new Pawn('white', [1, i], this.board));
@@ -37,7 +37,7 @@ export default class GameState {
         pieces.push(new Knight('black', [7, 6], this.board));
         pieces.push(new Bishop('black', [7, 2], this.board));
         pieces.push(new Bishop('black', [7, 5], this.board));
-        pieces.push(new Queen('black', [7, 4], this.board));
+        //pieces.push(new Queen('black', [7, 4], this.board));
         pieces.push(new King('black', [7, 3], this.board));
         for (let i = 0; i < this.board.getDims(); i++) {
             pieces.push(new Pawn('black', [6, i], this.board));
@@ -67,12 +67,21 @@ export default class GameState {
     }
 
     evaluateBoard() {
+        
         this.calculatePieceTotal('white');
         this.calculatePieceTotal('black');
         let white = this.currentState.find(player => player.player === 'white');
         let black = this.currentState.find(player => player.player === 'black');
 
-        return white.pieceTotal - black.pieceTotal;
+        if (white.checkmate) {
+            return -9999;
+        } else if (black.checkmate) {
+            return 9999;
+        } else if (white.stalemate || black.stalmate) {
+            return 0;
+        } else {
+            return white.pieceTotal - black.pieceTotal;
+        }
     }
 
     /**
@@ -251,9 +260,12 @@ export default class GameState {
 
     handleCastle(king, move) {
         let rook;
+        let lastMove = { movedPiece: king, prevPos: king.position, move: move, capturedPiece: null, hasMoved: true }
 
         if (king.color === 'white' && move[1] === 1) {
             rook = this.board.getSquare(0, 0).getPiece();
+            lastMove.castlePiece = rook;
+            lastMove.castlePos = rook.position;
             this.board.getSquare(move[0], move[1]).setPiece(king)
             this.board.getSquare(0, 2).setPiece(rook);
             this.board.getSquare(move[0], move[1]).getPiece().setPosition(move)
@@ -263,6 +275,8 @@ export default class GameState {
 
         } else if (king.color === 'white' && move[1] === 5) {
             rook = this.board.getSquare(0, 7).getPiece();
+            lastMove.castlePiece = rook;
+            lastMove.castlePos = rook.position;
             this.board.getSquare(move[0], move[1]).setPiece(king)
             this.board.getSquare(0, 4).setPiece(rook);
             this.board.getSquare(move[0], move[1]).getPiece().setPosition(move)
@@ -272,6 +286,8 @@ export default class GameState {
 
         } else if (king.color === 'black' && move[1] === 1) {
             rook = this.board.getSquare(7, 0).getPiece();
+            lastMove.castlePiece = rook;
+            lastMove.castlePos = rook.position;
             this.board.getSquare(move[0], move[1]).setPiece(king)
             this.board.getSquare(7, 2).setPiece(rook);
             this.board.getSquare(move[0], move[1]).getPiece().setPosition(move)
@@ -281,13 +297,17 @@ export default class GameState {
 
         } else if (king.color === 'black' && move[1] === 5) {
             rook = this.board.getSquare(7, 7).getPiece();
+            lastMove.castlePiece = rook;
+            lastMove.castlePos = rook.position;
             this.board.getSquare(move[0], move[1]).setPiece(king)
             this.board.getSquare(7, 4).setPiece(rook);
+            this.lastMove.castleDest = [7, 4];
             this.board.getSquare(move[0], move[1]).getPiece().setPosition(move)
             this.board.getSquare(7, 7).getPiece().setPosition([7, 4])
             this.board.getSquare(7, 7).removePiece();
             this.board.getSquare(7, 3).removePiece();
         }
+        this.history.push(lastMove)
     }
 
     /**
@@ -303,22 +323,22 @@ export default class GameState {
         let enemyKing = this.board.findKing(enemyColor)
 
 
-        // console.log(`the ${enemyKing.color} king is on the board at position ${enemyKing.position}`)
-        // console.log(`the ${king.color} king is on the board at position ${king.position}`)
+        // console.log(`the ${enemyKing} king is on the board at position ${enemyKing.position}`)
+        // console.log(`the ${king} king is on the board at position ${king.position}`)
 
 
         let rooks = allMoves.filter(piece => piece.name === 'rook');
 
-        this.checkForCastle(king, rooks, color, enemyColor)
-        this.handleEnPassant();
+        //this.checkForCastle(king, rooks, color, enemyColor)
+        //this.handleEnPassant();
 
         allMoves.forEach(piece => piece.moves = piece.moves.filter(move => {
             return !this.moveResultsInCheck(piece, move, king.position, enemyColor)
         }));
 
-        allMoves.forEach(piece => piece.moves.filter(move => {
-            return !this.posComparator(enemyKing.position, move)
-        }))
+        // allMoves.forEach(piece => piece.moves.filter(move => {
+        //     return !this.posComparator(enemyKing.position, move)
+        // }))
 
         let ind = this.currentState.findIndex(player => player.player === color);
         this.currentState[ind].legalMoves = allMoves;
@@ -351,9 +371,9 @@ export default class GameState {
 
         let piecePos = pieceObj.position;
 
-        if (pieceObj.name === 'king' && Math.abs(piecePos[1] - move[1]) === 2) {
-            this.handleCastle(pieceObj, move)
-        }
+        // if (pieceObj.name === 'king' && Math.abs(piecePos[1] - move[1]) === 2) {
+        //     this.handleCastle(pieceObj, move)
+        // }
         // } else {
         //     let validMove = pieceObj.moves.find(legalMove => {
         //         return this.posComparator(legalMove, move)
@@ -384,22 +404,22 @@ export default class GameState {
                     pieceObj.hasMoved();
                 }
             } else {
-                if (pieceObj.name === 'pawn') {
-                    if (pieceObj.position[0] === 1 || pieceObj.position[0] === 6) {
-                        if (move[0] === 3 || move[0] === 4) {
-                            this.currentState[1].enPass = pieceObj;
-                        } else {
-                            this.currentState[1].enPass = null;
-                        }
-                    }
-                    if (pieceObj.position[0] === 3 || pieceObj.position[0] === 4) {
-                        if (move[1] === pieceObj.position[1] + 1 || move[1] === pieceObj.position[1] - 1) {
-                            let [rank, file] = this.currentState[0].enPass.position
-                            this.lastMove.capturedPiece = this.currentState[0].enPass;
-                            this.board.getSquare(rank, file).removePiece()
-                        }
-                    }
-                }
+                // if (pieceObj.name === 'pawn') {
+                //     if (pieceObj.position[0] === 1 || pieceObj.position[0] === 6) {
+                //         if (move[0] === 3 || move[0] === 4) {
+                //             this.currentState[1].enPass = pieceObj;
+                //         } else {
+                //             this.currentState[1].enPass = null;
+                //         }
+                //     }
+                //     if (pieceObj.position[0] === 3 || pieceObj.position[0] === 4) {
+                //         if (move[1] === pieceObj.position[1] + 1 || move[1] === pieceObj.position[1] - 1) {
+                //             let [rank, file] = this.currentState[0].enPass.position
+                //             this.lastMove.capturedPiece = this.currentState[0].enPass;
+                //             this.board.getSquare(rank, file).removePiece()
+                //         }
+                //     }
+                //}
                 this.board.getSquare(move[0], move[1]).setPiece(pieceObj);
                 this.board.getSquare(piecePos[0], piecePos[1]).removePiece();
                 this.board.getSquare(move[0], move[1]).getPiece().setPosition([move[0], move[1]])
@@ -458,6 +478,13 @@ export default class GameState {
         if (this.history[this.history.length - 1].capturedPiece) {
             this.board.getSquare(...this.history[this.history.length - 1].move).setPiece(this.history[this.history.length - 1].capturedPiece);
             this.board.getSquare(...this.history[this.history.length - 1].move).getPiece().setPosition(this.history[this.history.length - 1].move);
+        }
+
+        if (this.history[this.history.length - 1].castlePiece) {
+            this.board.getSquare(...this.history[this.history.length - 1].castlePos).setPiece(this.history[this.history.length - 1].castlePiece);
+            this.board.getSquare(...this.history[this.history.length - 1].castlePos).getPiece().setPosition(this.history[this.history.length - 1].castlePos);
+            this.board.getSquare(...this.history[this.history.length - 1].castlePos).getPiece().hasNotMoved = true;
+            this.board.getSquare(...this.history[this.history.length - 1].castlePos).removePiece();
         }
 
         if (this.history[this.history.length - 1].hasMoved !== null) {
